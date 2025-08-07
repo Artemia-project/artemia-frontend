@@ -62,10 +62,15 @@ runs:
     - name: Create .env file on VM
       shell: bash
       run: |
+        # Create secure temp file for environment variables
         ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
-          "echo 'NODE_ENV=production' > /tmp/${{ inputs.container-name }}.env && \
-           echo 'DEPLOYMENT_ENV=${{ inputs.environment }}' >> /tmp/${{ inputs.container-name }}.env && \
-           echo '${{ env.ENV_FILE }}' >> /tmp/${{ inputs.container-name }}.env"
+          "umask 077 && \
+           echo 'NODE_ENV=production' > /tmp/${{ inputs.container-name }}.env && \
+           echo 'DEPLOYMENT_ENV=${{ inputs.environment }}' >> /tmp/${{ inputs.container-name }}.env"
+        
+        # Append secrets securely via stdin
+        echo '${{ env.ENV_FILE }}' | ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "cat >> /tmp/${{ inputs.container-name }}.env"
       env:
         ENV_FILE: ${{ env.ENV_FILE }}
 
