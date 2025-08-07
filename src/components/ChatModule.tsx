@@ -3,7 +3,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Sparkles, User, Bot } from 'lucide-react';
+import { Send, Sparkles, User, Bot, Heart, Bookmark } from 'lucide-react';
+import { toast } from '@/components/ui/use-toast';
 
 interface Message {
   id: string;
@@ -11,6 +12,7 @@ interface Message {
   content: string;
   timestamp: Date;
   suggestions?: string[];
+  isSaved?: boolean;
 }
 
 interface ChatModuleProps {
@@ -87,6 +89,24 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
     setInputValue(suggestion);
   };
 
+  const handleSaveMessage = (messageId: string) => {
+    setMessages(prev => 
+      prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, isSaved: !msg.isSaved }
+          : msg
+      )
+    );
+    
+    const message = messages.find(msg => msg.id === messageId);
+    if (message) {
+      toast({
+        title: message.isSaved ? "Message unsaved" : "Message saved!",
+        description: message.isSaved ? "Removed from your favorites" : "Added to your favorites",
+      });
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -95,9 +115,9 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
   };
 
   return (
-    <Card className="h-full flex flex-col shadow-gallery">
+    <Card className="h-full flex flex-col shadow-gallery bg-gradient-to-br from-card via-card to-accent/5 border border-border/50">
       {/* Header */}
-      <div className="p-4 border-b border-border bg-gradient-to-r from-card to-accent/5">
+      <div className="p-6 border-b border-border bg-gradient-to-r from-primary/5 to-accent/10 backdrop-blur-sm">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-accent-foreground" />
           <h2 className="font-medium text-card-foreground">Art Curator AI</h2>
@@ -122,14 +142,29 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               )}
               
               <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : ''}`}>
-                <div
-                  className={`p-3 rounded-lg transition-elegant ${
-                    message.type === 'user'
-                      ? 'bg-primary text-primary-foreground shadow-elegant'
-                      : 'bg-card border border-border shadow-sm'
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed">{message.content}</p>
+                <div className="relative group">
+                  <div
+                    className={`p-4 rounded-xl transition-elegant ${
+                      message.type === 'user'
+                        ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-elegant'
+                        : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery hover:shadow-elegant'
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed">{message.content}</p>
+                    
+                    {message.type === 'assistant' && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleSaveMessage(message.id)}
+                        className={`absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-elegant h-8 w-8 ${
+                          message.isSaved ? 'text-red-500 opacity-100' : 'text-muted-foreground hover:text-red-500'
+                        }`}
+                      >
+                        <Heart className={`w-4 h-4 ${message.isSaved ? 'fill-current' : ''}`} />
+                      </Button>
+                    )}
+                  </div>
                 </div>
                 
                 {message.suggestions && (

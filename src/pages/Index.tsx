@@ -125,16 +125,16 @@ const Index = () => {
       {/* Main Content */}
       <section className="py-12">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Chat Module */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Chat Module - Main Focus */}
             <div className="lg:col-span-1">
-              <div className="sticky top-8">
+              <div className="sticky top-8 h-[600px]">
                 <ChatModule onArtworkRecommendation={handleSaveArtwork} />
               </div>
             </div>
 
             {/* Artwork Grid */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-1">
               <ArtworkGrid 
                 onSaveArtwork={handleSaveArtwork}
                 onCompareArtwork={handleCompareArtwork}
