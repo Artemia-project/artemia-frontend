@@ -4,7 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Sparkles, User, Bot, Heart, Bookmark } from 'lucide-react';
-import { ArtisticRobot } from '@/components/ui/artistic-robot';
 import { toast } from '@/components/ui/use-toast';
 
 interface Message {
@@ -137,8 +136,8 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               className={`flex gap-3 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {message.type === 'assistant' && (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-                  <ArtisticRobot className="text-accent-foreground" size={18} />
+                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
+                  <Bot className="w-4 h-4 text-accent-foreground" />
                 </div>
               )}
               
@@ -195,8 +194,8 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
 
           {isLoading && (
             <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent/20 to-primary/20 flex items-center justify-center flex-shrink-0 shadow-sm">
-                <ArtisticRobot className="text-accent-foreground animate-pulse" size={18} />
+              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                <Bot className="w-4 h-4 text-accent-foreground" />
               </div>
               <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
                 <div className="flex space-x-1">
