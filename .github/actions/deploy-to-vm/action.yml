@@ -91,11 +91,13 @@ runs:
           "echo 'Container status:' && \
            sudo docker ps -a --filter name=${{ inputs.container-name }} && \
            echo 'Container logs:' && \
-           sudo docker logs ${{ inputs.container-name }} --tail 20 && \
+           sudo docker logs ${{ inputs.container-name }} --tail 30 && \
            echo 'Port bindings:' && \
-           sudo docker port ${{ inputs.container-name }} && \
-           echo 'Testing ports:' && \
-           netstat -tlnp | grep ':${{ inputs.port }}\|:$((${{ inputs.port }} + 1000))' || echo 'No port bindings found'"
+           sudo docker port ${{ inputs.container-name }} || echo 'No port bindings' && \
+           echo 'Testing ports with ss:' && \
+           ss -tlnp | grep ':${{ inputs.port }}\|:$((${{ inputs.port }} + 1000))' || echo 'No port bindings found' && \
+           echo 'Container processes:' && \
+           sudo docker exec ${{ inputs.container-name }} ps aux || echo 'Cannot exec into container'"
 
     - name: Health check
       shell: bash

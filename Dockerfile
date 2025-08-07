@@ -44,23 +44,13 @@ WORKDIR /app
 RUN echo '{"type": "module"}' > package.json
 
 # Create simple health check server
-RUN echo 'import { createServer } from "http";\n\
-const server = createServer((req, res) => {\n\
-  if (req.url === "/health-check") {\n\
-    res.writeHead(200, { "Content-Type": "application/json" });\n\
-    res.end(JSON.stringify({ status: "ok", timestamp: new Date().toISOString() }));\n\
-  } else {\n\
-    res.writeHead(404);\n\
-    res.end("Not Found");\n\
-  }\n\
-});\n\
-server.listen(3001, () => console.log("Health check server running on port 3001"));' > health-server.js
+RUN printf 'import { createServer } from "http";\nconsole.log("Health check server starting...");\nconst server = createServer((req, res) => {\n  console.log(`Received request: ${req.method} ${req.url}`);\n  if (req.url === "/health-check") {\n    res.writeHead(200, { "Content-Type": "application/json" });\n    const response = { status: "ok", timestamp: new Date().toISOString() };\n    res.end(JSON.stringify(response));\n    console.log("Health check response sent:", response);\n  } else {\n    res.writeHead(404);\n    res.end("Not Found");\n    console.log("404 response sent for:", req.url);\n  }\n});\nserver.listen(3001, "0.0.0.0", () => {\n  console.log("Health check server running on 0.0.0.0:3001");\n});\n' > health-server.js
 
 # Create startup script
-RUN echo '#!/bin/sh\n\
-node /app/health-server.js &\n\
-nginx -g "daemon off;"' > /start.sh && chmod +x /start.sh
+RUN printf '#!/bin/sh\nset -e\necho "Starting health check server..."\ncd /app\nnode health-server.js &\nHEALTH_PID=$!\necho "Health check server started with PID $HEALTH_PID"\nsleep 2\necho "Starting nginx..."\nexec nginx -g "daemon off;"\n' > /start.sh && chmod +x /start.sh
 
 EXPOSE 80 3001
 
+# Override nginx entrypoint
+ENTRYPOINT []
 CMD ["/start.sh"]
