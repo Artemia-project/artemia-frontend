@@ -78,7 +78,7 @@ runs:
         # Create temporary file locally and transfer securely
         umask 077
         echo '${{ env.ENV_FILE }}' > /tmp/env_secrets_$$
-        scp /tmp/env_secrets_$$ ${{ inputs.vm-username }}@${{ inputs.vm-host }}:/tmp/env_secrets_$$
+        scp -i ~/.ssh/deploy_key /tmp/env_secrets_$$ ${{ inputs.vm-username }}@${{ inputs.vm-host }}:/tmp/env_secrets_$$
         rm -f /tmp/env_secrets_$$
         
         # Append secrets and cleanup on remote host
