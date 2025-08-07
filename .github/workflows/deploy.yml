@@ -162,14 +162,11 @@ jobs:
 
   notify:
     name: Send Teams notification
-    needs: [build, deploy-development, deploy-staging, deploy-production]
+    # Notify only when build and production deployment are successful.
+    needs: [build, deploy-production]
     runs-on: ubuntu-latest
     if: |
-      needs.build.result == 'success' && (
-        needs.deploy-development.result == 'success' ||
-        needs.deploy-staging.result == 'success' ||
-        needs.deploy-production.result == 'success'
-      )
+      needs.build.result == 'success' && needs.deploy-production.result == 'success'
     
     steps:
       - name: Send Teams notification
