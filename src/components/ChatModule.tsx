@@ -157,8 +157,8 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
                         variant="ghost"
                         size="icon"
                         onClick={() => handleSaveMessage(message.id)}
-                        className={`absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-elegant h-8 w-8 ${
-                          message.isSaved ? 'text-red-500 opacity-100' : 'text-muted-foreground hover:text-red-500'
+                        className={`absolute top-2 right-2 transition-elegant h-8 w-8 ${
+                          message.isSaved ? 'text-red-500 bg-red-50/50' : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
                         }`}
                       >
                         <Heart className={`w-4 h-4 ${message.isSaved ? 'fill-current' : ''}`} />
