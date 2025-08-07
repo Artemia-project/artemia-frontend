@@ -161,29 +161,16 @@ jobs:
           ENV_FILE: ${{ secrets.ENV_FILE }}
 
   notify:
-    name: Notify Deployment Status
+    name: Send Teams notification
     needs: [build, deploy-development, deploy-staging, deploy-production]
     runs-on: ubuntu-latest
-    if: always()
+    if: |
+      needs.build.result == 'success' &&
+      (needs.deploy-development.result == 'success' || needs.deploy-development.result == 'skipped') &&
+      (needs.deploy-staging.result == 'success' || needs.deploy-staging.result == 'skipped') &&
+      (needs.deploy-production.result == 'success' || needs.deploy-production.result == 'skipped')
     
     steps:
-      - name: Determine deployment results
-        id: results
-        run: |
-          if [ "${{ needs.build.result }}" == "success" ] && \
-             ([ "${{ needs.deploy-development.result }}" == "success" ] || [ "${{ needs.deploy-development.result }}" == "skipped" ]) && \
-             ([ "${{ needs.deploy-staging.result }}" == "success" ] || [ "${{ needs.deploy-staging.result }}" == "skipped" ]) && \
-             ([ "${{ needs.deploy-production.result }}" == "success" ] || [ "${{ needs.deploy-production.result }}" == "skipped" ]); then
-            echo "status=SUCCESS" >> $GITHUB_OUTPUT
-            echo "color=good" >> $GITHUB_OUTPUT
-          else
-            echo "status=FAILED" >> $GITHUB_OUTPUT
-            echo "color=danger" >> $GITHUB_OUTPUT
-          fi
-
       - name: Send Teams notification
         run: |
-          STATUS_EMOJI="${{ steps.results.outputs.status == 'SUCCESS' && '✅' || '❌' }}"
-          STATUS_COLOR="${{ steps.results.outputs.status == 'SUCCESS' && 'Good' || 'Attention' }}"
-          
           curl -X POST "${{ secrets.TEAMS_WEBHOOK_URL }}"
