@@ -83,10 +83,24 @@ runs:
              --cpus=1 \
              ${{ inputs.image-name }}:latest"
 
+    - name: Debug container status
+      shell: bash
+      run: |
+        sleep 5
+        ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "echo 'Container status:' && \
+           sudo docker ps -a --filter name=${{ inputs.container-name }} && \
+           echo 'Container logs:' && \
+           sudo docker logs ${{ inputs.container-name }} --tail 20 && \
+           echo 'Port bindings:' && \
+           sudo docker port ${{ inputs.container-name }} && \
+           echo 'Testing ports:' && \
+           netstat -tlnp | grep ':${{ inputs.port }}\|:$((${{ inputs.port }} + 1000))' || echo 'No port bindings found'"
+
     - name: Health check
       shell: bash
       run: |
-        sleep 15
+        sleep 10
         ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "curl -f http://localhost:$((${{ inputs.port }} + 1000))/health-check || exit 1"
 
