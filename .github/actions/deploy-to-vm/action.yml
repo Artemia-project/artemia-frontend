@@ -1,0 +1,103 @@
+name: 'Deploy to VM'
+description: 'Deploy Docker container to Virtual Machine'
+inputs:
+  vm-host:
+    description: 'VM hostname or IP address'
+    required: true
+  vm-username:
+    description: 'VM username for SSH connection'
+    required: true
+  vm-private-key:
+    description: 'SSH private key for VM connection'
+    required: true
+  image-name:
+    description: 'Docker image name to deploy'
+    required: true
+  container-name:
+    description: 'Container name for deployment'
+    required: true
+  port:
+    description: 'Port to expose the container'
+    required: true
+    default: '3000'
+  environment:
+    description: 'Deployment environment'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup SSH key
+      shell: bash
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ inputs.vm-private-key }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ inputs.vm-host }} >> ~/.ssh/known_hosts
+
+    - name: Upload Docker image to VM
+      shell: bash
+      run: |
+        echo "Uploading Docker image to VM..."
+        scp -i ~/.ssh/id_rsa docker-image.tar.gz ${{ inputs.vm-username }}@${{ inputs.vm-host }}:/tmp/
+        echo "Docker image uploaded successfully"
+
+    - name: Load and prepare Docker image on VM
+      shell: bash
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "cd /tmp && \
+           echo 'Loading Docker image...' && \
+           sudo docker load < docker-image.tar.gz && \
+           echo 'Docker image loaded successfully' && \
+           sudo docker images | grep ${{ inputs.image-name }}"
+
+    - name: Stop and remove existing container
+      shell: bash
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "sudo docker stop ${{ inputs.container-name }} || true && \
+           sudo docker rm ${{ inputs.container-name }} || true"
+
+    - name: Create .env file on VM
+      shell: bash
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "echo 'NODE_ENV=production' > /tmp/${{ inputs.container-name }}.env && \
+           echo 'DEPLOYMENT_ENV=${{ inputs.environment }}' >> /tmp/${{ inputs.container-name }}.env && \
+           echo '${{ env.ENV_FILE }}' >> /tmp/${{ inputs.container-name }}.env"
+      env:
+        ENV_FILE: ${{ env.ENV_FILE }}
+
+    - name: Run new container
+      shell: bash
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "sudo docker run -d \
+             --name ${{ inputs.container-name }} \
+             --restart unless-stopped \
+             -p ${{ inputs.port }}:80 \
+             -p $((${{ inputs.port }} + 1000)):3001 \
+             --env-file /tmp/${{ inputs.container-name }}.env \
+             --memory=2g \
+             --cpus=1 \
+             ${{ inputs.image-name }}:latest"
+
+    - name: Health check
+      shell: bash
+      run: |
+        sleep 10
+        ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "curl -f http://localhost:${{ inputs.port }}/health-check || exit 1"
+
+    - name: Clean up old images, tar file, and env file
+      shell: bash
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "sudo docker image prune -f && sudo docker system prune -f && rm -f /tmp/docker-image.tar.gz && rm -f /tmp/${{ inputs.container-name }}.env"
+
+    - name: Cleanup SSH key
+      shell: bash
+      if: always()
+      run: |
+        rm -f ~/.ssh/id_rsa
