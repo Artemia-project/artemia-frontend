@@ -17,9 +17,6 @@ inputs:
     description: 'Docker image tag to deploy (defaults to github.sha)'
     required: false
     default: '${{ github.sha }}'
-  docker-username:
-    description: 'Docker Hub username for pulling images'
-    required: true
   container-name:
     description: 'Container name for deployment'
     required: true
@@ -37,25 +34,28 @@ runs:
     - name: Setup SSH key
       shell: bash
       run: |
-        # Start SSH agent and add private key securely
-        eval $(ssh-agent -s)
-        echo "${{ inputs.vm-private-key }}" | tr -d '\r' | ssh-add -
+        # Create SSH directory with secure permissions
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        
+        # Write SSH key to file with secure permissions
+        echo "${{ inputs.vm-private-key }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
         
         # Add host to known_hosts
-        mkdir -p ~/.ssh
         ssh-keyscan -H ${{ inputs.vm-host }} >> ~/.ssh/known_hosts
 
     - name: Pull Docker image
       shell: bash
       run: |
         # Pull specific SHA-tagged image for security
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
-          "sudo docker pull ${{ inputs.docker-username }}/${{ inputs.image-name }}:${{ inputs.image-tag }}"
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "sudo docker pull ${{ inputs.image-name }}:${{ inputs.image-tag }}"
 
     - name: Stop and remove existing container
       shell: bash
       run: |
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "sudo docker stop ${{ inputs.container-name }} || true && \
            sudo docker rm ${{ inputs.container-name }} || true"
 
@@ -63,7 +63,7 @@ runs:
       shell: bash
       run: |
         # Create secure temp file for environment variables on remote host
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "umask 077 && \
            echo 'NODE_ENV=production' > /tmp/${{ inputs.container-name }}.env && \
            echo 'DEPLOYMENT_ENV=${{ inputs.environment }}' >> /tmp/${{ inputs.container-name }}.env"
@@ -75,7 +75,7 @@ runs:
         rm -f /tmp/env_secrets_$$
         
         # Append secrets and cleanup on remote host
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "cat /tmp/env_secrets_$$ >> /tmp/${{ inputs.container-name }}.env && \
            rm -f /tmp/env_secrets_$$"
       env:
@@ -84,7 +84,7 @@ runs:
     - name: Run new container
       shell: bash
       run: |
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "sudo docker run -d \
              --name ${{ inputs.container-name }} \
              --restart unless-stopped \
@@ -93,13 +93,13 @@ runs:
              --env-file /tmp/${{ inputs.container-name }}.env \
              --memory=2g \
              --cpus=1 \
-             ${{ inputs.docker-username }}/${{ inputs.image-name }}:${{ inputs.image-tag }}"
+             ${{ inputs.image-name }}:${{ inputs.image-tag }}"
 
     - name: Debug container status
       shell: bash
       run: |
         sleep 5
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "echo 'Container status:' && \
            sudo docker ps -a --filter name=${{ inputs.container-name }} && \
            echo 'Container logs:' && \
@@ -115,20 +115,18 @@ runs:
       shell: bash
       run: |
         sleep 10
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "curl -f http://localhost:$((${{ inputs.port }} + 1000))/health-check || exit 1"
 
     - name: Clean up old images, tar file, and env file
       shell: bash
       run: |
-        ssh ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
           "sudo docker image prune -f && sudo docker system prune -f && rm -f /tmp/${{ inputs.container-name }}.env"
 
-    - name: Cleanup SSH agent
+    - name: Cleanup SSH key
       shell: bash
       if: always()
       run: |
-        # Kill SSH agent to cleanup loaded keys
-        if [ ! -z "$SSH_AGENT_PID" ]; then
-          kill $SSH_AGENT_PID
-        fi
+        # Securely remove SSH key file
+        rm -f ~/.ssh/deploy_key
