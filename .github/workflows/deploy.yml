@@ -99,6 +99,8 @@ jobs:
           vm-private-key: ${{ secrets.VM_PRIVATE_KEY }}
           image-name: ${{ needs.build.outputs.image-name }}
           image-tag: ${{ github.sha }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-token: ${{ secrets.DOCKER_TOKEN }}
           container-name: ${{ env.APP_NAME }}-dev
           port: 3001
           environment: development
@@ -124,6 +126,8 @@ jobs:
           vm-private-key: ${{ secrets.VM_PRIVATE_KEY }}
           image-name: ${{ needs.build.outputs.image-name }}
           image-tag: ${{ github.sha }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-token: ${{ secrets.DOCKER_TOKEN }}
           container-name: ${{ env.APP_NAME }}-staging
           port: 3002
           environment: staging
@@ -149,6 +153,8 @@ jobs:
           vm-private-key: ${{ secrets.VM_PRIVATE_KEY }}
           image-name: ${{ needs.build.outputs.image-name }}
           image-tag: ${{ github.sha }}
+          docker-username: ${{ secrets.DOCKER_USERNAME }}
+          docker-token: ${{ secrets.DOCKER_TOKEN }}
           container-name: ${{ env.APP_NAME }}-prod
           port: 3000
           environment: production

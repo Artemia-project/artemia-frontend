@@ -17,6 +17,12 @@ inputs:
     description: 'Docker image tag to deploy (defaults to github.sha)'
     required: false
     default: '${{ github.sha }}'
+  docker-username:
+    description: 'Docker Hub username for pulling images'
+    required: true
+  docker-token:
+    description: 'Docker Hub token for authentication'
+    required: true
   container-name:
     description: 'Container name for deployment'
     required: true
@@ -48,9 +54,10 @@ runs:
     - name: Pull Docker image
       shell: bash
       run: |
-        # Pull specific SHA-tagged image for security
-        ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
-          "sudo docker pull ${{ inputs.image-name }}:${{ inputs.image-tag }}"
+        # Securely pass Docker token and login to Docker Hub on VM
+        echo '${{ inputs.docker-token }}' | ssh -i ~/.ssh/deploy_key ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
+          "sudo docker login -u '${{ inputs.docker-username }}' --password-stdin && \
+           sudo docker pull ${{ inputs.image-name }}:${{ inputs.image-tag }}"
 
     - name: Stop and remove existing container
       shell: bash
