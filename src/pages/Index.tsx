@@ -112,12 +112,6 @@ const Index = () => {
                 {comparisonArtworks.length}/2 Selected
               </Badge>
             </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <Sparkles className="w-4 h-4 mr-1" />
-                AI-Powered
-              </Badge>
-            </div>
           </div>
         </div>
       </section>
