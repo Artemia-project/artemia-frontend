@@ -13,6 +13,9 @@ inputs:
   image-name:
     description: 'Docker image name to deploy'
     required: true
+  docker-username:
+    description: 'Docker Hub username for pulling images'
+    required: true
   container-name:
     description: 'Container name for deployment'
     required: true
@@ -35,22 +38,11 @@ runs:
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ inputs.vm-host }} >> ~/.ssh/known_hosts
 
-    - name: Upload Docker image to VM
-      shell: bash
-      run: |
-        echo "Uploading Docker image to VM..."
-        scp -i ~/.ssh/id_rsa docker-image.tar.gz ${{ inputs.vm-username }}@${{ inputs.vm-host }}:/tmp/
-        echo "Docker image uploaded successfully"
-
-    - name: Load and prepare Docker image on VM
+    - name: Pull Docker image
       shell: bash
       run: |
         ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
-          "cd /tmp && \
-           echo 'Loading Docker image...' && \
-           sudo docker load < docker-image.tar.gz && \
-           echo 'Docker image loaded successfully' && \
-           sudo docker images | grep ${{ inputs.image-name }}"
+          "sudo docker pull ${{ inputs.docker-username }}/${{ inputs.image-name }}:latest"
 
     - name: Stop and remove existing container
       shell: bash
@@ -115,7 +107,7 @@ runs:
       shell: bash
       run: |
         ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
-          "sudo docker image prune -f && sudo docker system prune -f && rm -f /tmp/docker-image.tar.gz && rm -f /tmp/${{ inputs.container-name }}.env"
+          "sudo docker image prune -f && sudo docker system prune -f && rm -f /tmp/${{ inputs.container-name }}.env"
 
     - name: Cleanup SSH key
       shell: bash
