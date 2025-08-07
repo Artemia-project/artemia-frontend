@@ -86,9 +86,9 @@ runs:
     - name: Health check
       shell: bash
       run: |
-        sleep 10
+        sleep 15
         ssh -i ~/.ssh/id_rsa ${{ inputs.vm-username }}@${{ inputs.vm-host }} \
-          "curl -f http://localhost:${{ inputs.port }}/health-check || exit 1"
+          "curl -f http://localhost:$((${{ inputs.port }} + 1000))/health-check || exit 1"
 
     - name: Clean up old images, tar file, and env file
       shell: bash
