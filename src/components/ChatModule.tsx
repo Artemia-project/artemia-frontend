@@ -86,7 +86,44 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    setInputValue(suggestion);
+    if (isLoading) return; // Prevent clicking while AI is responding
+    
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      type: 'user',
+      content: suggestion,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue(''); // Clear input field
+    setIsLoading(true);
+
+    // Simulate AI response (same logic as handleSendMessage)
+    setTimeout(() => {
+      const responses = [
+        "Based on your interest in modern art, I'd recommend starting with works by Picasso and Matisse. Their bold use of color and form revolutionized 20th-century art. Would you like me to show you some specific pieces?",
+        "For a contemporary exhibition, consider themes like 'Digital Identity' or 'Climate Change Through Art.' I can help you select pieces that create a cohesive narrative. What's your exhibition space like?",
+        "Currently, digital art and NFTs are creating new conversations in the art world, while there's also a resurgence of interest in textile arts and community-based practices. What aspect interests you most?",
+        "Impressionists like Monet focused on light and atmosphere with loose brushstrokes, while Expressionists like Van Gogh emphasized emotion through bold colors and dramatic forms. Both movements broke from traditional academic painting in fascinating ways."
+      ];
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: responses[Math.floor(Math.random() * responses.length)],
+        timestamp: new Date(),
+        suggestions: [
+          "Show me some examples",
+          "Tell me more about this style",
+          "How do I start collecting?",
+          "Plan an exhibition for me"
+        ]
+      };
+
+      setMessages(prev => [...prev, assistantMessage]);
+      setIsLoading(false);
+    }, 1500);
   };
 
   const handleSaveMessage = (messageId: string) => {
@@ -141,7 +178,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
                 </div>
               )}
               
-              <div className={`max-w-[80%] ${message.type === 'user' ? 'order-2' : ''}`}>
+              <div className="max-w-[80%]">
                 <div className="relative group">
                   <div
                     className={`p-4 rounded-xl transition-elegant ${
@@ -183,12 +220,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
                   </div>
                 )}
               </div>
-
-              {message.type === 'user' && (
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 mt-1 order-1">
-                  <User className="w-4 h-4 text-primary" />
-                </div>
-              )}
             </div>
           ))}
 
