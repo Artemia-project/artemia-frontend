@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Sparkles, User, Bot, Heart, Bookmark } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { Badge } from './ui/badge';
 
 interface Message {
   id: string;
@@ -155,14 +156,26 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
     <Card className="h-full flex flex-col shadow-gallery bg-gradient-to-br from-card via-card to-accent/5 border border-border/50">
       {/* Header */}
       <div className="p-6 border-b border-border bg-gradient-to-r from-primary/5 to-accent/10 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-accent-foreground" />
-          <h2 className="font-medium text-card-foreground">Art Curator AI</h2>
+        <div className="flex items-center justify-between">
+          {/* Left side: Icon + Title */}
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-accent-foreground" />
+            <h2 className="font-medium text-card-foreground">Art Curator AI</h2>
+          </div>
+
+          {/* Right side: Saved badge */}
+          <Badge variant="secondary" className="text-sm px-3 py-1 flex items-center">
+            <Heart className="w-4 h-4 mr-1 fill-current" />
+            0 Saved
+          </Badge>
         </div>
+
+        {/* Subtitle below */}
         <p className="text-sm text-muted-foreground mt-1">
           Your personal guide to art and exhibitions
         </p>
       </div>
+
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
