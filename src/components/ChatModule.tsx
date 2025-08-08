@@ -178,48 +178,57 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
                 </div>
               )}
               
-              <div className="max-w-[80%]">
-                <div className="relative group">
-                  <div
-                    className={`p-4 rounded-xl transition-elegant ${
-                      message.type === 'user'
-                        ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-elegant'
-                        : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery hover:shadow-elegant'
+{/* -------------------------------------------------------------- */}
+
+            <div className="max-w-[80%]">
+              <div
+                className={`p-4 rounded-xl transition-elegant relative ${
+                  message.type === 'user'
+                    ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-elegant'
+                    : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery hover:shadow-elegant'
+                }`}
+              >
+                {/* Text */}
+                <p className="text-sm leading-relaxed">{message.content}</p>
+
+                {/* Heart icon only for assistant */}
+                {message.type === 'assistant' && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleSaveMessage(message.id)}
+                    className={`absolute bottom-2 right-2 transition-elegant h-8 w-8 ${
+                      message.isSaved
+                        ? 'text-red-500 bg-red-50/50'
+                        : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed">{message.content}</p>
-                    
-                    {message.type === 'assistant' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleSaveMessage(message.id)}
-                        className={`absolute top-2 right-2 transition-elegant h-8 w-8 ${
-                          message.isSaved ? 'text-red-500 bg-red-50/50' : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
-                        }`}
-                      >
-                        <Heart className={`w-4 h-4 ${message.isSaved ? 'fill-current' : ''}`} />
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                
-                {message.suggestions && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {message.suggestions.map((suggestion, index) => (
-                      <Button
-                        key={index}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        className="text-xs h-7 px-2 hover:bg-accent/20 transition-smooth"
-                      >
-                        {suggestion}
-                      </Button>
-                    ))}
-                  </div>
+                    <Heart className={`w-4 h-4 ${message.isSaved ? 'fill-current' : ''}`} />
+                  </Button>
                 )}
               </div>
+
+              {/* Suggestions */}
+              {message.suggestions && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {message.suggestions.map((suggestion, index) => (
+                    <Button
+                      key={index}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleSuggestionClick(suggestion)}
+                      className="text-xs h-7 px-2 hover:bg-accent/20 transition-smooth"
+                    >
+                      {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+
+{/* -------------------------------------------------------------- */}
+
             </div>
           ))}
 
@@ -247,7 +256,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask about art, exhibitions, or get personalized recommendations..."
+            placeholder="***예시 프롬프트 넣기***"
             className="flex-1 transition-smooth focus:shadow-elegant"
             disabled={isLoading}
           />
