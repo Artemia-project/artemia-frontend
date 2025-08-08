@@ -56,11 +56,9 @@ RUN mkdir -p /var/cache/nginx/client_temp \
               /var/log/nginx \
               /var/run/nginx
 
-
-
-
-
-
+# Copy and set permissions for start script before switching users
+COPY start.sh /start.sh
+RUN chmod +x /start.sh && chown appuser:appgroup /start.sh
 
 # Switch to non-root user
 USER appuser
@@ -69,5 +67,4 @@ EXPOSE 80
 
 # Override nginx entrypoint
 ENTRYPOINT []
-COPY start.sh /start.sh
 CMD ["/start.sh"]
