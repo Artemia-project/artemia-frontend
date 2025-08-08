@@ -12,6 +12,13 @@ services:
       - NODE_ENV=production
       - DEPLOYMENT_ENV=${DEPLOYMENT_ENV:-development}
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache/nginx
+      - /var/run
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health-check"]
       interval: 30s
