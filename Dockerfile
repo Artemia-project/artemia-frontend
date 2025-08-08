@@ -60,6 +60,10 @@ RUN mkdir -p /var/cache/nginx/client_temp \
 COPY start.sh /start.sh
 RUN chmod +x /start.sh && chown appuser:appgroup /start.sh
 
+# Ensure nginx has proper permissions to start
+RUN touch /var/run/nginx.pid && \
+    chown appuser:appgroup /var/run/nginx.pid
+
 # Switch to non-root user
 USER appuser
 
