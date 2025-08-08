@@ -1,16 +1,42 @@
 version: '3.8'
 
+# 컨테이너들이 함께 사용할 공통 네트워크를 정의
+networks:
+  artemia-net:
+    driver: bridge
+
 services:
+  # ❶. 백엔드 서비스를 추가
+  artemia-backend:
+    container_name: artemia-backend
+    # 백엔드 소스 코드가 있는 폴더 경로를 지정
+    build:
+      context: ../artemia-backend  # 예: 상위 폴더의 artemia-backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000" # 백엔드는 8000번 포트를 사용
+    networks:
+      - artemia-net
+
+  # 프론트엔드 서비스
   artemia-frontend:
+    # 백엔드가 먼저 실행되도록 의존성을 설정
+    depends_on:
+      - artemia-backend
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "80:80"
-      - "3001:3001"
     environment:
       - NODE_ENV=production
       - DEPLOYMENT_ENV=${DEPLOYMENT_ENV:-development}
+      # 백엔드 주소를 환경 변수로 주입
+      # 'artemia-backend'는 위에서 정의한 백엔드 서비스 이름입니다.
+      - REACT_APP_API_URL=http://artemia-backend:8000
+    networks:
+      - artemia-net # 백엔드와 동일한 네트워크를 사용하도록 설정
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true

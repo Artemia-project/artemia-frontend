@@ -1,3 +1,8 @@
+/* src/components/ChatModule.tsx
+   ─────────────────────────────────────────────────────────
+   백엔드 FastAPI(/ask)와 통신해 `final_answer`를 채팅창에 표시하는
+   완성형 컴포넌트.  (C) Artemia
+*/
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,7 +10,7 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Sparkles, Bot, Heart } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
-import { Badge } from './ui/badge';
+import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
   DialogContent,
@@ -15,6 +20,7 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 
+/* ---- 타입 --------------------------------------------------------- */
 interface Message {
   id: string;
   type: 'user' | 'assistant';
@@ -25,135 +31,127 @@ interface Message {
 }
 
 interface ChatModuleProps {
-  onArtworkRecommendation?: (artwork: any) => void;
+  onArtworkRecommendation?: (artwork: any) => void; /* 확장용 */
 }
 
-export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation }) => {
+/* ---- 환경변수: API End-Point -------------------------------------- */
+const API_BASE =
+  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+
+/* ---- 유틸: 백엔드 호출 ------------------------------------------- */
+async function callBackend(question: string) {
+  const res = await fetch(`${API_BASE}/ask`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question })
+  });
+  if (!res.ok) {
+    const msg = `Backend error ${res.status}`;
+    throw new Error(msg);
+  }
+  return (await res.json()) as {
+    final_answer: string;
+    cards: any[];
+  };
+}
+
+/* =================================================================== */
+/*                        ChatModule 컴포넌트                           */
+/* =================================================================== */
+export const ChatModule: React.FC<ChatModuleProps> = ({
+  onArtworkRecommendation
+}) => {
+  /* ---------------- state --------------------------------------- */
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
+      id: 'welcome',
       type: 'assistant',
       content:
-        "Hello! I'm your personal art curator. I can help you discover artworks, plan exhibitions, and understand different art movements. What kind of art experience are you looking for today?",
+        "안녕하세요! 저는 전시·예술 큐레이터 AI예요. 궁금한 점을 질문해 보세요 😉",
       timestamp: new Date(),
       suggestions: [
-        "I'm new to art, where should I start?",
-        'Help me plan a modern art exhibition',
-        "What's trending in contemporary art?",
-        'Compare impressionist vs expressionist styles'
+        '이번 주말 볼 만한 전시 추천해줘',
+        '전통 미술과 현대 미술 차이 알려줘',
+        '서울 무료 전시 알려줘'
       ]
     }
   ]);
+
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
+  /* ---------------- auto-scroll --------------------------------- */
   useEffect(() => {
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const savedMessages = messages.filter((msg) => msg.isSaved);
+  /* ---------------- 파생 ------------------------------ */
+  const savedMessages = messages.filter((m) => m.isSaved);
   const savedCount = savedMessages.length;
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
-
+  /* ---------------- 메시지 전송 로직 ------------------- */
+  const sendQuestion = async (question: string) => {
+    /* ① 유저 메시지 추가 */
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: inputValue,
+      content: question,
       timestamp: new Date()
     };
-
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      const responses = [
-        "Based on your interest in modern art, I'd recommend starting with works by Picasso and Matisse. Their bold use of color and form revolutionized 20th-century art. Would you like me to show you some specific pieces?",
-        "For a contemporary exhibition, consider themes like 'Digital Identity' or 'Climate Change Through Art.' I can help you select pieces that create a cohesive narrative. What's your exhibition space like?",
-        'Currently, digital art and NFTs are creating new conversations in the art world, while there\'s also a resurgence of interest in textile arts and community-based practices. What aspect interests you most?',
-        'Impressionists like Monet focused on light and atmosphere with loose brushstrokes, while Expressionists like Van Gogh emphasized emotion through bold colors and dramatic forms. Both movements broke from traditional academic painting in fascinating ways.'
-      ];
+    /* ② 백엔드 호출 */
+    try {
+      const data = await callBackend(question);
 
+      /* ③ assistant 메시지 추가 */
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
-        content: responses[Math.floor(Math.random() * responses.length)],
-        timestamp: new Date(),
-        suggestions: [
-          'Show me some examples',
-          'Tell me more about this style',
-          'How do I start collecting?',
-          'Plan an exhibition for me'
-        ]
+        content: data.final_answer,
+        timestamp: new Date()
+        // suggestions: ...  (cards 데이터를 이용해 만들고 싶다면 여기에)
       };
-
       setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err: any) {
+      console.error(err);
+      toast({
+        title: '오류',
+        description: err.message ?? '서버 통신에 실패했습니다.'
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
+  };
+
+  /* ---------------- handlers --------------------------- */
+  const handleSendMessage = () => {
+    if (!inputValue.trim() || isLoading) return;
+    sendQuestion(inputValue.trim());
+    setInputValue('');
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     if (isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: suggestion,
-      timestamp: new Date()
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
-    setIsLoading(true);
-
-    setTimeout(() => {
-      const responses = [
-        "Based on your interest in modern art, I'd recommend starting with works by Picasso and Matisse. Their bold use of color and form revolutionized 20th-century art. Would you like me to show you some specific pieces?",
-        "For a contemporary exhibition, consider themes like 'Digital Identity' or 'Climate Change Through Art.' I can help you select pieces that create a cohesive narrative. What's your exhibition space like?",
-        'Currently, digital art and NFTs are creating new conversations in the art world, while there\'s also a resurgence of interest in textile arts and community-based practices. What aspect interests you most?',
-        'Impressionists like Monet focused on light and atmosphere with loose brushstrokes, while Expressionists like Van Gogh emphasized emotion through bold colors and dramatic forms. Both movements broke from traditional academic painting in fascinating ways.'
-      ];
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: responses[Math.floor(Math.random() * responses.length)],
-        timestamp: new Date(),
-        suggestions: [
-          'Show me some examples',
-          'Tell me more about this style',
-          'How do I start collecting?',
-          'Plan an exhibition for me'
-        ]
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1500);
+    sendQuestion(suggestion);
   };
 
-  const handleSaveMessage = (messageId: string) => {
+  const handleSaveMessage = (id: string) => {
     setMessages((prev) =>
-      prev.map((msg) =>
-        msg.id === messageId ? { ...msg, isSaved: !msg.isSaved } : msg
-      )
+      prev.map((m) => (m.id === id ? { ...m, isSaved: !m.isSaved } : m))
     );
-
-    const message = messages.find((msg) => msg.id === messageId);
-    if (message) {
-      toast({
-        title: message.isSaved ? 'Message unsaved' : 'Message saved!',
-        description: message.isSaved
-          ? 'Removed from your favorites'
-          : 'Added to your favorites'
-      });
-    }
+    const msg = messages.find((m) => m.id === id);
+    toast({
+      title: msg?.isSaved ? '저장 해제' : '즐겨찾기',
+      description: msg?.isSaved
+        ? '메시지가 즐겨찾기에서 제거되었습니다.'
+        : '메시지를 즐겨찾기에 추가했어요.'
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -163,13 +161,14 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
     }
   };
 
+  /* ---------------- Render ----------------------------- */
   return (
     <>
+      {/* === 메인 카드 =================================== */}
       <Card className="h-full flex flex-col shadow-gallery bg-gradient-to-br from-card via-card to-accent/5 border border-border/50">
         {/* Header */}
         <div className="p-6 border-b border-border bg-gradient-to-r from-primary/5 to-accent/10 backdrop-blur-sm">
           <div className="flex items-center justify-between">
-            {/* Left */}
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-accent-foreground" />
               <h2 className="font-medium text-card-foreground">
@@ -177,7 +176,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               </h2>
             </div>
 
-            {/* Saved badge */}
             <Badge
               variant="secondary"
               className="text-sm px-3 py-1 flex items-center cursor-pointer"
@@ -187,75 +185,72 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               {savedCount} Saved
             </Badge>
           </div>
-
           <p className="text-sm text-muted-foreground mt-1">
-            Your personal guide to art and exhibitions
+            예술·전시 정보를 무엇이든 물어보세요!
           </p>
         </div>
 
         {/* Messages */}
         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
           <div className="space-y-4">
-            {messages.map((message) => (
+            {messages.map((m) => (
               <div
-                key={message.id}
+                key={m.id}
                 className={`flex gap-3 ${
-                  message.type === 'user'
-                    ? 'justify-end'
-                    : 'justify-start'
+                  m.type === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
-                {message.type === 'assistant' && (
+                {m.type === 'assistant' && (
                   <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
                     <Bot className="w-4 h-4 text-accent-foreground" />
                   </div>
                 )}
 
                 <div className="max-w-[80%]">
+                  {/* bubble */}
                   <div
-                    className={`p-4 rounded-xl transition-elegant relative ${
-                      message.type === 'user'
+                    className={`p-4 rounded-xl relative ${
+                      m.type === 'user'
                         ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-elegant'
-                        : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery hover:shadow-elegant'
+                        : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed">
-                      {message.content}
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {m.content}
                     </p>
 
-                    {message.type === 'assistant' && (
+                    {m.type === 'assistant' && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleSaveMessage(message.id)}
-                        className={`absolute bottom-2 right-2 transition-elegant h-8 w-8 ${
-                          message.isSaved
+                        onClick={() => handleSaveMessage(m.id)}
+                        className={`absolute bottom-2 right-2 h-8 w-8 ${
+                          m.isSaved
                             ? 'text-red-500 bg-red-50/50'
                             : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
                         }`}
                       >
                         <Heart
                           className={`w-4 h-4 ${
-                            message.isSaved ? 'fill-current' : ''
+                            m.isSaved ? 'fill-current' : ''
                           }`}
                         />
                       </Button>
                     )}
                   </div>
 
-                  {message.suggestions && (
+                  {/* (선택) suggestions */}
+                  {m.suggestions && (
                     <div className="mt-2 flex flex-wrap gap-1">
-                      {message.suggestions.map((suggestion, index) => (
+                      {m.suggestions.map((s, i) => (
                         <Button
-                          key={index}
+                          key={i}
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            handleSuggestionClick(suggestion)
-                          }
-                          className="text-xs h-7 px-2 hover:bg-accent/20 transition-smooth"
+                          onClick={() => handleSuggestionClick(s)}
+                          className="text-xs h-7 px-2"
                         >
-                          {suggestion}
+                          {s}
                         </Button>
                       ))}
                     </div>
@@ -264,6 +259,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               </div>
             ))}
 
+            {/* 로딩 애니메이션 */}
             {isLoading && (
               <div className="flex gap-3">
                 <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
@@ -294,8 +290,8 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="***예시 프롬프트 넣기***"
-              className="flex-1 transition-smooth focus:shadow-elegant"
+              placeholder="궁금한 전시·예술 정보를 입력하세요"
+              className="flex-1"
               disabled={isLoading}
             />
             <Button
@@ -303,7 +299,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               disabled={!inputValue.trim() || isLoading}
               variant="curator"
               size="icon"
-              className="transition-elegant hover:scale-105"
             >
               <Send className="w-4 h-4" />
             </Button>
@@ -311,13 +306,13 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
         </div>
       </Card>
 
-      {/* Saved Messages Modal */}
+      {/* Saved Modal */}
       <Dialog open={isSavedModalOpen} onOpenChange={setIsSavedModalOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Saved Messages</DialogTitle>
             <DialogDescription>
-              These are the messages you’ve marked as favorite.
+              즐겨찾기한 메시지 목록입니다.
             </DialogDescription>
           </DialogHeader>
 
@@ -341,17 +336,14 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
               ))
             ) : (
               <p className="text-muted-foreground text-sm">
-                No saved messages yet.
+                저장된 메시지가 없습니다.
               </p>
             )}
           </div>
 
           <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setIsSavedModalOpen(false)}
-            >
-              Close
+            <Button variant="secondary" onClick={() => setIsSavedModalOpen(false)}>
+              닫기
             </Button>
           </DialogFooter>
         </DialogContent>
