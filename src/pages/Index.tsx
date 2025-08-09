@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ChatModule } from '@/components/ChatModule';
-import { ArtworkGrid } from '@/components/ArtworkGrid';
 import { ComparisonView } from '@/components/ComparisonView';
 import { ExhibitionWorldCup } from '@/components/ExhibitionWorldCup';
 import { ExhibitionGallery } from '@/components/ExhibitionGallery';
