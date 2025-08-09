@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Sparkles, Palette, Eye, Heart, ArrowLeftRight, Trophy } from 'lucide-react';
+import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy } from 'lucide-react';
 import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 
@@ -119,37 +119,40 @@ const Index = () => {
             <div className="flex items-center justify-center gap-2 mb-4">
               <Sparkles className="w-6 h-6 text-primary-foreground" />
               <h1 className="text-4xl md:text-5xl font-light leading-tight">
-                Art Curator AI
+                Artemia: Art Curator AI
               </h1>
-              
-              {/* Saved Messages Badge */}
-              <Badge
-                variant="secondary"
-                className="text-sm px-3 py-1 flex items-center cursor-pointer ml-4 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20"
-                onClick={() => setShowSavedModal(true)}
-              >
-                <Heart className="w-4 h-4 mr-1 fill-current" />
-                {savedMessagesCount} Saved
-              </Badge>
             </div>
             
             <p className="text-lg text-primary-foreground/80 mb-6 leading-relaxed">
-              Your personal guide to art and exhibitions
+              전시 추천 주변 관광지 추천 서비스
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="secondary" size="lg" className="px-8" onClick={handleStartExploring}>
-                <Palette className="w-5 h-5 mr-2" />
-                전시회 둘러보기
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="px-8 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20"
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
                 onClick={handleWorldCupClick}
               >
                 <Trophy className="w-5 h-5 mr-2" />
-                전시회 월드컵 ({exhibitions.length})
+                내 전시 월드컵
+              </Button>
+
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                onClick={handleStartExploring}
+              >
+                <Eye className="w-5 h-5 mr-2" />
+                둘러보기
+              </Button>
+                          
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                onClick={() => setShowSavedModal(true)}
+              >
+                <Heart className={`w-4 h-4 mr-2 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
+                {savedMessagesCount} 저장된 메세지
               </Button>
             </div>
           </div>
