@@ -183,7 +183,7 @@ export const exhibitionsData: Exhibition[] =
   },
   {
     "id": 15,
-    "title": "크리스찬 히다카: 하늘이 극장이 되고, 극장이 하늘에 있으니",
+    "title": "크리스찬 히다카:\n하늘이 극장이 되고, 극장이 하늘에 있으니",
     "description": "동서양 회화가 융합된 독창적 풍경화",
     "theme": "회화",
     "start": "2025-06-05",
@@ -195,8 +195,8 @@ export const exhibitionsData: Exhibition[] =
   },
   {
     "id": 16,
-    "title": "광복80주년 가나아트컬렉션 특별전 《서시: 별을 노래하는 마음으로》",
-    "description": "80년대 한국의 사회적 풍경을 담은 명화",
+    "title": "광복80주년 가나아트컬렉션 특별전\n《서시: 별을 노래하는 마음으로》",
+    "description": "민중미술 21점으로 광복·전쟁·분단의 역사 재조명",
     "theme": null,
     "start": "2025-03-20",
     "end": "2025-10-26",
