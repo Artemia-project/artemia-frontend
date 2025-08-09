@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { ChatModule } from '@/components/ChatModule';
 import { ArtworkGrid } from '@/components/ArtworkGrid';
 import { ComparisonView } from '@/components/ComparisonView';
+import { ExhibitionWorldCup } from '@/components/ExhibitionWorldCup';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Sparkles, Palette, Eye, Heart, ArrowLeftRight } from 'lucide-react';
+import { Sparkles, Palette, Eye, Heart, ArrowLeftRight, Trophy } from 'lucide-react';
+import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 
 interface Artwork {
@@ -25,6 +27,9 @@ const Index = () => {
   const [savedArtworks, setSavedArtworks] = useState<Artwork[]>([]);
   const [comparisonArtworks, setComparisonArtworks] = useState<Artwork[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [showWorldCup, setShowWorldCup] = useState(false);
+
+  const exhibitions = exhibitionsData;
 
   const handleSaveArtwork = (artwork: Artwork) => {
     setSavedArtworks(prev => {
@@ -51,6 +56,18 @@ const Index = () => {
       }
       return newComparison;
     });
+  };
+
+  const handleWorldCupClick = () => {
+    console.log('🏆 World Cup button clicked!');
+    console.log('📊 Exhibitions ready:', exhibitions.length);
+    
+    if (exhibitions.length >= 16) {
+      alert(`🎉 Tournament ready! ${exhibitions.length} exhibitions loaded.`);
+      setShowWorldCup(true);
+    } else {
+      alert(`⚠️ Need 16 exhibitions for tournament. Currently have: ${exhibitions.length}`);
+    }
   };
 
   return (
@@ -91,6 +108,15 @@ const Index = () => {
                 <Eye className="w-5 h-5 mr-2" />
                 View Collections
               </Button>
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-8 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20"
+                onClick={handleWorldCupClick}
+              >
+                <Trophy className="w-5 h-5 mr-2" />
+                Exhibition Tournament ({exhibitions.length})
+              </Button>
             </div>
           </div>
         </div>
@@ -110,6 +136,12 @@ const Index = () => {
               <Badge variant="secondary" className="text-sm px-3 py-1">
                 <ArrowLeftRight className="w-4 h-4 mr-1" />
                 {comparisonArtworks.length}/2 Selected
+              </Badge>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant="secondary" className="text-sm px-3 py-1">
+                <Trophy className="w-4 h-4 mr-1" />
+                {exhibitions.length} Exhibitions Ready
               </Badge>
             </div>
           </div>
@@ -137,7 +169,7 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
               <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-6 h-6 text-accent-foreground" />
@@ -167,6 +199,16 @@ const Index = () => {
                 Save your favorite pieces and create themed collections for future exhibitions.
               </p>
             </Card>
+
+            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
+              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                <Trophy className="w-6 h-6 text-accent-foreground" />
+              </div>
+              <h3 className="text-lg font-medium mb-2">Exhibition Tournament</h3>
+              <p className="text-muted-foreground">
+                Discover your favorite exhibitions through an interactive World Cup-style tournament.
+              </p>
+            </Card>
           </div>
         </div>
       </section>
@@ -179,6 +221,14 @@ const Index = () => {
             setShowComparison(false);
             setComparisonArtworks([]);
           }}
+        />
+      )}
+
+      {/* Exhibition World Cup Modal */}
+      {showWorldCup && (
+        <ExhibitionWorldCup
+          exhibitions={exhibitions.slice(0, 16)}
+          onClose={() => setShowWorldCup(false)}
         />
       )}
     </div>
