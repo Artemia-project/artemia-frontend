@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { X, Trophy, Crown, MapPin, Calendar, Sparkles, Eye, Share2, Route } from 'lucide-react';
+import { X, Trophy, Crown, MapPin, Calendar, Sparkles, Eye, Share2, Route, RotateCcw } from 'lucide-react';
 import { type Exhibition } from '@/data/exhibitions';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 
@@ -29,6 +29,8 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [champion, setChampion] = useState<Exhibition | null>(null);
+  const [showRoundTransition, setShowRoundTransition] = useState(false);
+  const [nextRoundName, setNextRoundName] = useState('');
 
   // Initialize tournament with Round of 16
   useEffect(() => {
@@ -84,13 +86,42 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
         setIsComplete(true);
         console.log('🏆 Tournament complete! Champion:', winner.title);
       } else {
-        // Advance to next round
-        setTimeout(() => advanceToNextRound(updatedMatches), 1500);
+        // Show round transition effect before advancing
+        const nextRound = currentRound + 1;
+        setNextRoundName(getRoundName(nextRound));
+        setShowRoundTransition(true);
+        
+        setTimeout(() => {
+          setShowRoundTransition(false);
+          advanceToNextRound(updatedMatches);
+        }, 2500);
       }
     } else {
       // Move to next match in current round
       setCurrentMatchIndex(currentMatchIndex + 1);
     }
+  };
+
+  const restartTournament = () => {
+    setCurrentRound(1);
+    setCurrentMatchIndex(0);
+    setIsComplete(false);
+    setChampion(null);
+    setShowRoundTransition(false);
+    setNextRoundName('');
+    
+    // Re-initialize tournament with Round of 16
+    const round1Matches: Match[] = [];
+    for (let i = 0; i < 16; i += 2) {
+      round1Matches.push({
+        id: `r1-m${i/2 + 1}`,
+        exhibition1: exhibitions[i],
+        exhibition2: exhibitions[i + 1],
+        winner: null,
+        round: 1
+      });
+    }
+    setAllMatches(round1Matches);
   };
 
   const advanceToNextRound = (matches: Match[]) => {
@@ -204,34 +235,15 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   if (isComplete && champion) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-4xl max-h-[95vh] overflow-auto shadow-gallery">
-          {/* Champion Header with Hero Background */}
-          <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80">
-            <div className="absolute inset-0">
-              <img
-                src={heroArtwork}
-                alt="Hero artwork"
-                className="w-full h-full object-cover opacity-20"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
-            </div>
-            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 py-8 text-primary-foreground">
-              <div className="flex-1 flex items-center justify-center gap-3">
-                <Trophy className="w-8 h-8 text-yellow-200" />
-                <CardTitle className="text-3xl font-light">
-                  Tournament Champion
-                </CardTitle>
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={onClose}
-                className="text-primary-foreground hover:bg-primary-foreground/20 backdrop-blur-sm"
-              >
-                <X className="w-5 h-5" />
-              </Button>
-            </CardHeader>
-          </div>
+        <Card className="w-full max-w-4xl max-h-[95vh] overflow-auto shadow-gallery relative">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 text-foreground hover:bg-muted"
+          >
+            <X className="w-5 h-5" />
+          </Button>
           
           <CardContent className="p-8 space-y-8">
             <div className="text-center">
@@ -292,6 +304,10 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                 <Route className="w-5 h-5 mr-2" />
                 코스 추천 받기
               </Button>
+              <Button variant="outline" size="lg" className="px-8" onClick={restartTournament}>
+                <RotateCcw className="w-5 h-5 mr-2" />
+                다시 플레이하기
+              </Button>
               <Button variant="gallery" size="lg" className="px-8" onClick={onClose}>
                 토너먼트 종료
               </Button>
@@ -303,6 +319,46 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   }
 
   const currentMatch = getCurrentMatch();
+
+  // Round Transition Screen
+  if (showRoundTransition) {
+    return (
+      <div className="fixed inset-0 bg-background/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="text-center space-y-8">
+          <div className="space-y-4">
+            <h1 className="text-6xl font-light text-primary animate-pulse">
+              {nextRoundName}
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              다음 라운드로 진출합니다
+            </p>
+          </div>
+          
+          <div className="flex justify-center">
+            <div className="w-20 h-20 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          
+          {/* Celebration Effects */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="absolute animate-bounce"
+                style={{
+                  left: `${10 + i * 10}%`,
+                  top: `${20 + (i % 2) * 40}%`,
+                  animationDelay: `${i * 0.2}s`,
+                  animationDuration: '1.5s',
+                }}
+              >
+                <Sparkles className="w-8 h-8 text-yellow-400 opacity-70" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -323,7 +379,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                 <Trophy className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <CardTitle className="text-3xl font-light">전시회 월드컵</CardTitle>
+                <CardTitle className="text-3xl font-light">전시회 월드컵: 당신을 위한 전시는?</CardTitle>
                 <p className="text-primary-foreground/80 mt-1">
                   {getRoundName(currentRound)} • {currentMatchIndex + 1}번째 매치
                 </p>
@@ -357,9 +413,6 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
         <CardContent className="p-8 space-y-8">
           {currentMatch ? (
             <>
-              <div className="text-center space-y-3">
-                <h2 className="text-3xl font-normal text-foreground">당신을 위한 전시는 무엇인가요?</h2>
-              </div>
 
               <div className="grid grid-cols-2 gap-8 items-start">
                 <ExhibitionCard
