@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { X, Trophy, Crown, MapPin, Calendar, Sparkles, Eye, Share2, Route, RotateCcw } from 'lucide-react';
 import { type Exhibition } from '@/data/exhibitions';
+import { useToast } from '@/hooks/use-toast';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 
 interface ExhibitionWorldCupProps {
@@ -31,6 +32,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   const [champion, setChampion] = useState<Exhibition | null>(null);
   const [showRoundTransition, setShowRoundTransition] = useState(false);
   const [nextRoundName, setNextRoundName] = useState('');
+  const { toast } = useToast();
 
   // Initialize tournament with Round of 16
   useEffect(() => {
@@ -165,6 +167,40 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
     return Math.round((completedMatches / totalMatches) * 100);
   };
 
+  const handleShare = async () => {
+    if (!champion) return;
+    
+    const shareData = {
+      title: `${champion.title} - 전시회 월드컵 우승작`,
+      text: `전시회 월드컵에서 "${champion.title}"이 우승했습니다!`,
+      url: champion.link
+    };
+    
+    try {
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+        toast({
+          title: "공유 완료!",
+          description: "우승작이 성공적으로 공유되었습니다.",
+        });
+      } else {
+        // Fallback to clipboard
+        const shareText = `전시회 월드컵 우승작: ${champion.title}\n${champion.description}\n자세히 보기: ${champion.link}`;
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          title: "공유 완료!",
+          description: "우승작 정보가 클립보드에 복사되었습니다.",
+        });
+      }
+    } catch (err) {
+      toast({
+        title: "공유 실패",
+        description: "공유에 실패했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const ExhibitionCard = ({ exhibition, onSelect }: {
     exhibition: Exhibition;
     onSelect: () => void;
@@ -200,7 +236,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
       
       <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
         <h3 className="font-medium text-xl leading-tight text-card-foreground group-hover:text-accent-foreground transition-colors min-h-[3.5rem] flex items-start">
-          <span className="line-clamp-2">{exhibition.title}</span>
+          <span className="line-clamp-2" style={{ whiteSpace: 'pre-line' }}>{exhibition.title}</span>
         </h3>
         
         <p className="text-base text-muted-foreground leading-relaxed min-h-[2.5rem] flex items-start">
@@ -271,7 +307,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
               
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Crown className="w-8 h-8 text-yellow-500" />
-                <h2 className="text-4xl font-normal text-foreground">{champion.title}</h2>
+                <h2 className="text-4xl font-normal text-foreground text-center" style={{ whiteSpace: 'pre-line' }}>{champion.title}</h2>
               </div>
               <p className="text-muted-foreground text-lg leading-relaxed mb-6 max-w-2xl mx-auto">
                 {champion.description}
@@ -290,26 +326,26 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
             </div>
             
             <div className="flex flex-wrap gap-4 justify-center pt-4">
-              <Button variant="curator" size="lg" className="px-8" asChild>
+              <Button variant="default" size="lg" className="px-8" asChild>
                 <a href={champion.link} target="_blank" rel="noopener noreferrer">
                   <Trophy className="w-5 h-5 mr-2" />
-                  전시 상세 보기
+                  상세보기
                 </a>
               </Button>
-              <Button variant="outline" size="lg" className="px-8">
+              <Button variant="outline" size="lg" className="px-8" onClick={handleShare}>
                 <Share2 className="w-5 h-5 mr-2" />
                 공유하기
               </Button>
-              <Button variant="secondary" size="lg" className="px-8">
+              <Button variant="outline" size="lg" className="px-8">
                 <Route className="w-5 h-5 mr-2" />
-                코스 추천 받기
+                코스추천
               </Button>
-              <Button variant="outline" size="lg" className="px-8" onClick={restartTournament}>
+              <Button variant="secondary" size="lg" className="px-8" onClick={restartTournament}>
                 <RotateCcw className="w-5 h-5 mr-2" />
-                다시 플레이하기
+                다시하기
               </Button>
-              <Button variant="gallery" size="lg" className="px-8" onClick={onClose}>
-                토너먼트 종료
+              <Button variant="ghost" size="lg" className="px-8" onClick={onClose}>
+                종료
               </Button>
             </div>
           </CardContent>
