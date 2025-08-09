@@ -106,13 +106,7 @@ const Index = () => {
               <span className="block text-gradient font-normal">Speaks to You</span>
             </h1>
 
-           
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-       <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="secondary" size="lg" className="px-8" onClick={handleStartExploring}>
                 <Palette className="w-5 h-5 mr-2" />
                 전시회 둘러보기
@@ -127,30 +121,12 @@ const Index = () => {
                 전시회 월드컵 ({exhibitions.length})
               </Button>
             </div>
-      <section className="py-8 border-b border-border bg-gradient-to-r from-card to-accent/5">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-8 text-center">
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <Heart className="w-4 h-4 mr-1 fill-current" />
-                {savedArtworks.length} Saved
-              </Badge>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <ArrowLeftRight className="w-4 h-4 mr-1" />
-                {comparisonArtworks.length}/2 Selected
-              </Badge>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <Trophy className="w-4 h-4 mr-1" />
-                {exhibitions.length} Exhibitions Ready
-              </Badge>
-            </div>
+
+           
           </div>
         </div>
       </section>
+
 
       {/* Main Content */}
       <section className="py-12">
