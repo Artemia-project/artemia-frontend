@@ -6,16 +6,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Sparkles, Bot, Heart } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Badge } from './ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
 
-interface Message {
+export interface Message {
   id: string;
   type: 'user' | 'assistant';
   content: string;
@@ -28,9 +20,10 @@ interface ChatModuleProps {
   onArtworkRecommendation?: (artwork: any) => void;
   externalMessage?: string;
   onMessageSent?: () => void;
+  onSavedMessagesChange?: (count: number, messages: Message[]) => void;
 }
 
-export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation, externalMessage, onMessageSent }) => {
+export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation, externalMessage, onMessageSent, onSavedMessagesChange }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -48,13 +41,22 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation,
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
+    const scrollToBottom = () => {
+      if (scrollAreaRef.current) {
+        const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollElement) {
+          scrollElement.scrollTop = scrollElement.scrollHeight;
+        }
+      }
+    };
+
+    // Small delay to ensure DOM is updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
   useEffect(() => {
@@ -105,6 +107,12 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation,
 
   const savedMessages = messages.filter((msg) => msg.isSaved);
   const savedCount = savedMessages.length;
+
+  useEffect(() => {
+    if (onSavedMessagesChange) {
+      onSavedMessagesChange(savedCount, savedMessages);
+    }
+  }, [savedCount, savedMessages, onSavedMessagesChange]);
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -213,33 +221,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation,
 
   return (
     <>
-      <Card className="h-full flex flex-col shadow-gallery bg-gradient-to-br from-card via-card to-accent/5 border border-border/50">
-        {/* Header */}
-        <div className="p-6 border-b border-border bg-gradient-to-r from-primary/5 to-accent/10 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            {/* Left */}
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-accent-foreground" />
-              <h2 className="font-medium text-card-foreground">
-                Art Curator AI
-              </h2>
-            </div>
-
-            {/* Saved badge */}
-            <Badge
-              variant="secondary"
-              className="text-sm px-3 py-1 flex items-center cursor-pointer"
-              onClick={() => setIsSavedModalOpen(true)}
-            >
-              <Heart className="w-4 h-4 mr-1 fill-current" />
-              {savedCount} Saved
-            </Badge>
-          </div>
-
-          <p className="text-sm text-muted-foreground mt-1">
-            Your personal guide to art and exhibitions
-          </p>
-        </div>
+      <Card className="flex-1 flex flex-col shadow-gallery bg-gradient-to-br from-card via-card to-accent/5 border border-border/50 min-h-0 overflow-hidden">
 
         {/* Messages */}
         <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
@@ -358,52 +340,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation,
           </div>
         </div>
       </Card>
-
-      {/* Saved Messages Modal */}
-      <Dialog open={isSavedModalOpen} onOpenChange={setIsSavedModalOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Saved Messages</DialogTitle>
-            <DialogDescription>
-              These are the messages you’ve marked as favorite.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 max-h-[300px] overflow-y-auto">
-            {savedMessages.length > 0 ? (
-              savedMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="p-3 border rounded-lg bg-accent/5 text-sm relative"
-                >
-                  {msg.content}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 text-red-500"
-                    onClick={() => handleSaveMessage(msg.id)}
-                  >
-                    <Heart className="w-4 h-4 fill-current" />
-                  </Button>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                No saved messages yet.
-              </p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setIsSavedModalOpen(false)}
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 };
