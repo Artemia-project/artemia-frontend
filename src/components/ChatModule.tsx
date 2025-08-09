@@ -39,20 +39,40 @@ const API_BASE =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 /* ---- 유틸: 백엔드 호출 ------------------------------------------- */
-async function callBackend(question: string) {
-  const res = await fetch(`${API_BASE}/ask`, {
+type BackendResponse = { final_answer: string; cards: any[] };
+
+const MAX_TURNS = 8; // 과도한 페이로드 방지
+
+async function callBackend(history: Message[]): Promise<BackendResponse> {
+  // 프론트의 Message[] → 백엔드가 기대하는 {messages:[{role,content}], meta:{…}}
+  const payload = {
+    messages: history.slice(-MAX_TURNS).map(m => ({
+      role: m.type === 'user' ? 'user' : 'assistant',
+      content: m.content,
+    })),
+    meta: {
+      client: 'artful-muse-chat',
+      ts: new Date().toISOString(),
+    },
+  };
+
+  const res = await fetch(`${API_BASE}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question })
+    body: JSON.stringify(payload),
   });
+
+  const text = await res.text();
   if (!res.ok) {
-    const msg = `Backend error ${res.status}`;
-    throw new Error(msg);
+    // FastAPI의 오류 메시지(detail)를 최대한 보여주자
+    try {
+      const j = JSON.parse(text);
+      throw new Error(`Backend error ${res.status}: ${j.detail ?? text}`);
+    } catch {
+      throw new Error(`Backend error ${res.status}: ${text}`);
+    }
   }
-  return (await res.json()) as {
-    final_answer: string;
-    cards: any[];
-  };
+  return JSON.parse(text) as BackendResponse;
 }
 
 /* =================================================================== */
@@ -130,16 +150,80 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
   };
 
   /* ---------------- handlers --------------------------- */
-  const handleSendMessage = () => {
-    if (!inputValue.trim() || isLoading) return;
-    sendQuestion(inputValue.trim());
-    setInputValue('');
+  const handleSendMessage = async () => {
+  if (!inputValue.trim() || isLoading) return;
+
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    type: 'user',
+    content: inputValue,
+    timestamp: new Date(),
   };
 
-  const handleSuggestionClick = (suggestion: string) => {
-    if (isLoading) return;
-    sendQuestion(suggestion);
+  const nextHistory = [...messages, userMessage]; // ⭐ 히스토리 업데이트본
+  setMessages(nextHistory);
+  setInputValue('');
+  setIsLoading(true);
+
+  try {
+    const data = await callBackend(nextHistory); // ⭐ 히스토리 전체 전달
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      type: 'assistant',
+      content: data.final_answer,
+      timestamp: new Date(),
+      suggestions: [
+        '비슷한 코스 더 추천',
+        '아이 동선만 짧게 요약해줘',
+        '근처 무료 전시 알려줘',
+        '지도 링크도 같이 줘',
+      ],
+    };
+    setMessages(prev => [...prev, assistantMessage]);
+  } catch (err: any) {
+    toast({
+      title: '백엔드 오류',
+      description: err?.message ?? '요청 중 오류가 발생했어요.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+const handleSuggestionClick = async (suggestion: string) => {
+  if (isLoading) return;
+
+  const userMessage: Message = {
+    id: Date.now().toString(),
+    type: 'user',
+    content: suggestion,
+    timestamp: new Date(),
   };
+
+  const nextHistory = [...messages, userMessage];
+  setMessages(nextHistory);
+  setIsLoading(true);
+
+  try {
+    const data = await callBackend(nextHistory);
+    const assistantMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      type: 'assistant',
+      content: data.final_answer,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, assistantMessage]);
+  } catch (err: any) {
+    toast({
+      title: '백엔드 오류',
+      description: err?.message ?? '요청 중 오류가 발생했어요.',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleSaveMessage = (id: string) => {
     setMessages((prev) =>
