@@ -100,21 +100,19 @@ const Index = () => {
         
         <div className="relative container mx-auto px-4 py-20">
           <div className="max-w-3xl mx-auto text-center text-primary-foreground">
-            <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">AI-Powered Art Curation</span>
-            </div>
             
             <h1 className="text-5xl md:text-6xl font-light mb-6 leading-tight">
               Discover Art That
               <span className="block text-gradient font-normal">Speaks to You</span>
             </h1>
-            
-            <p className="text-xl text-primary-foreground/80 mb-8 leading-relaxed">
-              Your personal AI curator helps you explore, understand, and curate art exhibitions tailored to your taste and knowledge level.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+
+           
+          </div>
+        </div>
+      </section>
+
+      {/* Stats Section */}
+       <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="secondary" size="lg" className="px-8" onClick={handleStartExploring}>
                 <Palette className="w-5 h-5 mr-2" />
                 전시회 둘러보기
@@ -129,11 +127,6 @@ const Index = () => {
                 전시회 월드컵 ({exhibitions.length})
               </Button>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
       <section className="py-8 border-b border-border bg-gradient-to-r from-card to-accent/5">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-8 text-center">
@@ -168,62 +161,6 @@ const Index = () => {
               externalMessage={externalChatMessage}
               onMessageSent={handleChatMessageSent}
             />
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-gradient-to-r from-accent/5 to-accent/10 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-normal text-foreground mb-4">
-              Curate Like a Professional
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our AI understands art history, movements, and individual preferences to provide personalized curation guidance.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">AI-Powered Insights</h3>
-              <p className="text-muted-foreground">
-                Get personalized recommendations based on art movements, techniques, and your preferences.
-              </p>
-            </Card>
-
-            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <ArrowLeftRight className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Compare & Contrast</h3>
-              <p className="text-muted-foreground">
-                Analyze artworks side-by-side to understand artistic evolution and stylistic differences.
-              </p>
-            </Card>
-
-            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Build Collections</h3>
-              <p className="text-muted-foreground">
-                Save your favorite pieces and create themed collections for future exhibitions.
-              </p>
-            </Card>
-
-            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Trophy className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Exhibition Tournament</h3>
-              <p className="text-muted-foreground">
-                Discover your favorite exhibitions through an interactive World Cup-style tournament.
-              </p>
-            </Card>
           </div>
         </div>
       </section>
