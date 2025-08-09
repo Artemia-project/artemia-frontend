@@ -3,6 +3,7 @@ import { ChatModule } from '@/components/ChatModule';
 import { ArtworkGrid } from '@/components/ArtworkGrid';
 import { ComparisonView } from '@/components/ComparisonView';
 import { ExhibitionWorldCup } from '@/components/ExhibitionWorldCup';
+import { ExhibitionGallery } from '@/components/ExhibitionGallery';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -28,11 +29,12 @@ const Index = () => {
   const [comparisonArtworks, setComparisonArtworks] = useState<Artwork[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [showWorldCup, setShowWorldCup] = useState(false);
+  const [showExhibitionGallery, setShowExhibitionGallery] = useState(false);
   const [externalChatMessage, setExternalChatMessage] = useState<string>('');
 
   const exhibitions = exhibitionsData;
 
-  const handleSaveArtwork = (artwork: Artwork) => {
+  function handleSaveArtwork(artwork: Artwork) {
     setSavedArtworks(prev => {
       const exists = prev.find(item => item.id === artwork.id);
       if (exists) {
@@ -40,7 +42,7 @@ const Index = () => {
       }
       return [...prev, artwork];
     });
-  };
+  }
 
   const handleCompareArtwork = (artwork: Artwork) => {
     setComparisonArtworks(prev => {
@@ -69,6 +71,10 @@ const Index = () => {
     } else {
       alert(`⚠️ Need 16 exhibitions for tournament. Currently have: ${exhibitions.length}`);
     }
+  };
+
+  const handleStartExploring = () => {
+    setShowExhibitionGallery(true);
   };
 
   const handleSendMessageToChat = (message: string) => {
@@ -109,13 +115,9 @@ const Index = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="secondary" size="lg" className="px-8">
+              <Button variant="secondary" size="lg" className="px-8" onClick={handleStartExploring}>
                 <Palette className="w-5 h-5 mr-2" />
-                Start Exploring Art
-              </Button>
-              <Button variant="outline" size="lg" className="px-8 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20">
-                <Eye className="w-5 h-5 mr-2" />
-                View Collections
+                전시회 둘러보기
               </Button>
               <Button 
                 variant="outline" 
@@ -124,7 +126,7 @@ const Index = () => {
                 onClick={handleWorldCupClick}
               >
                 <Trophy className="w-5 h-5 mr-2" />
-                Exhibition Tournament ({exhibitions.length})
+                전시회 월드컵 ({exhibitions.length})
               </Button>
             </div>
           </div>
@@ -243,6 +245,14 @@ const Index = () => {
           exhibitions={exhibitions.slice(0, 16)}
           onClose={() => setShowWorldCup(false)}
           onSendMessage={handleSendMessageToChat}
+        />
+      )}
+
+      {/* Exhibition Gallery Modal */}
+      {showExhibitionGallery && (
+        <ExhibitionGallery
+          exhibitions={exhibitions}
+          onClose={() => setShowExhibitionGallery(false)}
         />
       )}
     </div>
