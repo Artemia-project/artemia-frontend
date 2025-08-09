@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { X, Trophy, Crown, MapPin, Calendar, Sparkles, Eye } from 'lucide-react';
+import { X, Trophy, Crown, MapPin, Calendar, Sparkles, Eye, Share2, Route } from 'lucide-react';
 import { type Exhibition } from '@/data/exhibitions';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 
@@ -142,7 +142,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
       className="group cursor-pointer transition-elegant hover:scale-[1.02] hover:shadow-gallery border-2 hover:border-accent overflow-hidden h-full flex flex-col"
       onClick={onSelect}
     >
-      <div className="relative aspect-[4/3] overflow-hidden flex-shrink-0">
+      <div className="relative aspect-[3/4] overflow-hidden flex-shrink-0">
         <img
           src={exhibition.image}
           alt={exhibition.title}
@@ -168,15 +168,15 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
       </div>
       
       <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
-        <h3 className="font-medium text-lg leading-tight text-card-foreground group-hover:text-accent-foreground transition-colors min-h-[3.5rem] flex items-start">
+        <h3 className="font-medium text-xl leading-tight text-card-foreground group-hover:text-accent-foreground transition-colors min-h-[3.5rem] flex items-start">
           <span className="line-clamp-2">{exhibition.title}</span>
         </h3>
         
-        <p className="text-sm text-muted-foreground leading-relaxed min-h-[2.5rem] flex items-start">
+        <p className="text-base text-muted-foreground leading-relaxed min-h-[2.5rem] flex items-start">
           <span className="line-clamp-2">{exhibition.description}</span>
         </p>
         
-        <div className="flex items-center gap-2 text-sm text-muted-foreground min-h-[1.25rem]">
+        <div className="flex items-center gap-2 text-base text-muted-foreground min-h-[1.25rem]">
           <MapPin className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">{exhibition.location}</span>
         </div>
@@ -184,15 +184,15 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
         <div className="flex items-center justify-between pt-2 mt-auto">
           <div className="flex items-center gap-2">
             {exhibition.theme && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-sm">
                 {exhibition.theme}
               </Badge>
             )}
-            <Badge variant="secondary" className="text-xs bg-accent/10 text-accent-foreground">
+            <Badge variant="secondary" className="text-sm bg-accent/10 text-accent-foreground">
               {exhibition.cost}
             </Badge>
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             {exhibition.start} - {exhibition.end}
           </div>
         </div>
@@ -204,7 +204,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   if (isComplete && champion) {
     return (
       <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-4xl shadow-gallery overflow-hidden">
+        <Card className="w-full max-w-4xl max-h-[95vh] overflow-auto shadow-gallery">
           {/* Champion Header with Hero Background */}
           <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80">
             <div className="absolute inset-0">
@@ -215,25 +215,27 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
               />
               <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
             </div>
-            <CardHeader className="relative text-center pb-8 pt-12 text-primary-foreground">
-              <div className="flex justify-center mb-6">
-                <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center animate-pulse shadow-gallery backdrop-blur-sm">
-                  <Trophy className="w-10 h-10 text-white" />
-                </div>
+            <CardHeader className="relative flex flex-row items-center justify-between space-y-0 py-8 text-primary-foreground">
+              <div className="flex-1 flex items-center justify-center gap-3">
+                <Trophy className="w-8 h-8 text-yellow-200" />
+                <CardTitle className="text-3xl font-light">
+                  Tournament Champion
+                </CardTitle>
               </div>
-              <CardTitle className="text-3xl font-light mb-2">
-                <span className="block text-4xl font-normal mb-2">🏆</span>
-                Tournament Champion
-              </CardTitle>
-              <p className="text-primary-foreground/80 text-lg">
-                전시회 월드컵 우승작이 결정되었습니다!
-              </p>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={onClose}
+                className="text-primary-foreground hover:bg-primary-foreground/20 backdrop-blur-sm"
+              >
+                <X className="w-5 h-5" />
+              </Button>
             </CardHeader>
           </div>
           
           <CardContent className="p-8 space-y-8">
             <div className="text-center">
-              <div className="relative aspect-[4/3] w-80 mx-auto rounded-xl overflow-hidden shadow-gallery mb-6">
+              <div className="relative aspect-[3/4] w-[32rem] mx-auto rounded-xl overflow-hidden shadow-gallery mb-8">
                 <img
                   src={champion.image}
                   alt={champion.title}
@@ -255,7 +257,10 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                 </div>
               </div>
               
-              <h2 className="text-2xl font-normal text-foreground mb-3">{champion.title}</h2>
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <Crown className="w-8 h-8 text-yellow-500" />
+                <h2 className="text-4xl font-normal text-foreground">{champion.title}</h2>
+              </div>
               <p className="text-muted-foreground text-lg leading-relaxed mb-6 max-w-2xl mx-auto">
                 {champion.description}
               </p>
@@ -272,28 +277,22 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
               </div>
             </div>
             
-            <Separator />
-            
-            <div className="bg-gradient-to-r from-accent/10 to-accent/5 p-6 rounded-xl border border-accent/20">
-              <h4 className="font-medium text-accent-foreground mb-3 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                AI 큐레이터의 한마디
-              </h4>
-              <p className="text-card-foreground leading-relaxed">
-                이 전시가 치열한 토너먼트를 통해 우승했습니다! {champion.theme ? `${champion.theme} 분야의 ` : ''}뛰어난 기획력과 작품성을 인정받아 
-                최종 승리자로 선정되었습니다. 많은 관람객들에게 깊은 인상을 남길 것으로 기대되는 전시입니다.
-              </p>
-            </div>
-
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-wrap gap-4 justify-center pt-4">
               <Button variant="curator" size="lg" className="px-8" asChild>
                 <a href={champion.link} target="_blank" rel="noopener noreferrer">
-                  <Eye className="w-5 h-5 mr-2" />
+                  <Trophy className="w-5 h-5 mr-2" />
                   전시 상세 보기
                 </a>
               </Button>
+              <Button variant="outline" size="lg" className="px-8">
+                <Share2 className="w-5 h-5 mr-2" />
+                공유하기
+              </Button>
+              <Button variant="secondary" size="lg" className="px-8">
+                <Route className="w-5 h-5 mr-2" />
+                코스 추천 받기
+              </Button>
               <Button variant="gallery" size="lg" className="px-8" onClick={onClose}>
-                <Trophy className="w-5 h-5 mr-2" />
                 토너먼트 종료
               </Button>
             </div>
@@ -318,13 +317,13 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
             />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
           </div>
-          <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-6 text-primary-foreground">
+          <CardHeader className="relative flex flex-row items-center justify-between space-y-0 py-8 text-primary-foreground">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-primary-foreground/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                 <Trophy className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
-                <CardTitle className="text-2xl font-light">Exhibition World Cup</CardTitle>
+                <CardTitle className="text-3xl font-light">전시회 월드컵</CardTitle>
                 <p className="text-primary-foreground/80 mt-1">
                   {getRoundName(currentRound)} • {currentMatchIndex + 1}번째 매치
                 </p>
@@ -359,10 +358,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
           {currentMatch ? (
             <>
               <div className="text-center space-y-3">
-                <h2 className="text-2xl font-normal text-foreground">어떤 전시를 선택하시겠습니까?</h2>
-                <p className="text-muted-foreground text-lg">
-                  더 관심 있는 전시를 클릭해 주세요
-                </p>
+                <h2 className="text-3xl font-normal text-foreground">당신을 위한 전시는 무엇인가요?</h2>
               </div>
 
               <div className="grid grid-cols-2 gap-8 items-start">
@@ -375,16 +371,6 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                   exhibition={currentMatch.exhibition2}
                   onSelect={() => selectWinner(currentMatch.exhibition2)}
                 />
-              </div>
-
-              {/* VS Badge centered between the two columns */}
-              <div className="flex justify-center -mt-6">
-                <Badge 
-                  variant="secondary" 
-                  className="text-xl font-bold px-6 py-3 bg-background border-2 shadow-gallery hover:shadow-elegant transition-elegant"
-                >
-                  VS
-                </Badge>
               </div>
             </>
           ) : (
@@ -399,48 +385,47 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
             </div>
           )}
 
-          <Separator />
-
-          {/* Tournament Progress */}
-          <div className="space-y-6">
-            <h3 className="font-medium text-xl text-center text-foreground">토너먼트 진행 상황</h3>
-            <div className="grid grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map(round => {
+          {/* Tournament Progress - Single Line */}
+          <div className="space-y-4 pt-4">
+            <div className="flex items-center justify-center gap-4 text-center">
+              {[1, 2, 3, 4].map((round, index) => {
                 const roundMatches = allMatches.filter(m => m.round === round);
                 const completedRoundMatches = roundMatches.filter(m => m.winner);
                 const matchesCount = Math.pow(2, 4 - round);
                 
                 return (
-                  <Card key={round} className={`p-4 transition-elegant ${
-                    round === currentRound ? 'border-accent shadow-elegant' : 
-                    round < currentRound ? 'border-green-200 bg-green-50' : ''
-                  }`}>
-                    <div className="text-center space-y-3">
-                      <div className={`text-sm font-medium ${
-                        round === currentRound ? 'text-accent-foreground' : 
-                        round < currentRound ? 'text-green-700' : 'text-muted-foreground'
-                      }`}>
-                        {getRoundName(round)}
-                      </div>
-                      <div className="space-y-1">
-                        {Array.from({ length: matchesCount }).map((_, index) => (
-                          <div 
-                            key={index}
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              index < completedRoundMatches.length
-                                ? 'bg-green-500' 
-                                : round === currentRound && index === currentMatchIndex
-                                  ? 'bg-accent animate-pulse' 
-                                  : 'bg-muted'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        {completedRoundMatches.length}/{matchesCount}
-                      </div>
+                  <div key={round} className="flex items-center gap-2">
+                    <div className={`text-base font-medium ${
+                      round === currentRound ? 'text-primary' : 
+                      round < currentRound ? 'text-primary' : 'text-muted-foreground'
+                    }`}>
+                      {getRoundName(round)}
                     </div>
-                  </Card>
+                    <div className="flex gap-1">
+                      {Array.from({ length: matchesCount }).map((_, barIndex) => (
+                        <div 
+                          key={barIndex}
+                          className={`w-3 h-3 rounded transition-all duration-300 ${
+                            barIndex < completedRoundMatches.length
+                              ? 'bg-primary' 
+                              : round === currentRound && barIndex === currentMatchIndex
+                                ? 'bg-gallery-gold opacity-75' 
+                                : 'bg-muted'
+                          }`}
+                          style={{
+                            backgroundColor: barIndex < completedRoundMatches.length
+                              ? 'hsl(220, 30%, 25%)' 
+                              : round === currentRound && barIndex === currentMatchIndex
+                                ? 'hsl(45, 100%, 50%)'
+                                : undefined
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {index < 3 && (
+                      <div className="text-muted-foreground text-sm px-2">→</div>
+                    )}
+                  </div>
                 );
               })}
             </div>
