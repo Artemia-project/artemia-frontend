@@ -26,9 +26,11 @@ interface Message {
 
 interface ChatModuleProps {
   onArtworkRecommendation?: (artwork: any) => void;
+  externalMessage?: string;
+  onMessageSent?: () => void;
 }
 
-export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation }) => {
+export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation, externalMessage, onMessageSent }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -54,6 +56,52 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ onArtworkRecommendation 
       scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (externalMessage) {
+      const sendExternalMessage = async () => {
+        const userMessage: Message = {
+          id: Date.now().toString(),
+          type: 'user',
+          content: externalMessage,
+          timestamp: new Date()
+        };
+
+        setMessages((prev) => [...prev, userMessage]);
+        setIsLoading(true);
+
+        setTimeout(() => {
+          const responses = [
+            `${externalMessage}에 대한 맞춤형 코스를 추천해드릴게요! 이 전시회와 연관된 주변 갤러리와 박물관을 포함한 문화 코스를 계획해보세요. 근처 카페나 레스토랑도 함께 추천해드릴까요?`,
+            `훌륭한 선택이네요! ${externalMessage.split(' ')[0]} 전시회를 중심으로 한 하루 코스를 짜보겠습니다. 비슷한 작품들을 볼 수 있는 다른 장소들과 함께 문화적 경험을 극대화할 수 있는 루트를 제안해드릴게요.`,
+            `${externalMessage.split(' ')[0]} 전시회와 테마가 연결되는 다른 문화 공간들을 찾아보겠습니다. 미술관, 갤러리, 그리고 관련 문화시설들을 포함한 종합적인 코스를 계획해서 알려드릴게요!`
+          ];
+
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            type: 'assistant',
+            content: responses[Math.floor(Math.random() * responses.length)],
+            timestamp: new Date(),
+            suggestions: [
+              '상세한 코스 일정 짜줘',
+              '교통편 정보도 알려줘',
+              '비슷한 다른 전시 추천해줘',
+              '근처 맛집도 알려줘'
+            ]
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+          setIsLoading(false);
+        }, 1500);
+      };
+
+      sendExternalMessage();
+      
+      if (onMessageSent) {
+        onMessageSent();
+      }
+    }
+  }, [externalMessage]);
 
   const savedMessages = messages.filter((msg) => msg.isSaved);
   const savedCount = savedMessages.length;

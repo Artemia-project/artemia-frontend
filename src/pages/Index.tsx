@@ -28,6 +28,7 @@ const Index = () => {
   const [comparisonArtworks, setComparisonArtworks] = useState<Artwork[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [showWorldCup, setShowWorldCup] = useState(false);
+  const [externalChatMessage, setExternalChatMessage] = useState<string>('');
 
   const exhibitions = exhibitionsData;
 
@@ -68,6 +69,14 @@ const Index = () => {
     } else {
       alert(`⚠️ Need 16 exhibitions for tournament. Currently have: ${exhibitions.length}`);
     }
+  };
+
+  const handleSendMessageToChat = (message: string) => {
+    setExternalChatMessage(message);
+  };
+
+  const handleChatMessageSent = () => {
+    setExternalChatMessage('');
   };
 
   return (
@@ -152,7 +161,11 @@ const Index = () => {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
-            <ChatModule onArtworkRecommendation={handleSaveArtwork} />
+            <ChatModule 
+              onArtworkRecommendation={handleSaveArtwork}
+              externalMessage={externalChatMessage}
+              onMessageSent={handleChatMessageSent}
+            />
           </div>
         </div>
       </section>
@@ -229,6 +242,7 @@ const Index = () => {
         <ExhibitionWorldCup
           exhibitions={exhibitions.slice(0, 16)}
           onClose={() => setShowWorldCup(false)}
+          onSendMessage={handleSendMessageToChat}
         />
       )}
     </div>

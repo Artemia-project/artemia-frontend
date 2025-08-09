@@ -11,6 +11,7 @@ import heroArtwork from '@/assets/hero-artwork.jpg';
 interface ExhibitionWorldCupProps {
   exhibitions: Exhibition[];
   onClose: () => void;
+  onSendMessage?: (message: string) => void;
 }
 
 interface Match {
@@ -23,7 +24,8 @@ interface Match {
 
 export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({ 
   exhibitions, 
-  onClose 
+  onClose,
+  onSendMessage
 }) => {
   const [currentRound, setCurrentRound] = useState(1);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
@@ -201,6 +203,17 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
     }
   };
 
+  const handleCourseRecommendation = () => {
+    if (!champion) return;
+    
+    const message = `${champion.title} 관련 코스 추천해줘`;
+    
+    if (onSendMessage) {
+      onSendMessage(message);
+    }
+    onClose(); // Close the tournament module
+  };
+
   const ExhibitionCard = ({ exhibition, onSelect }: {
     exhibition: Exhibition;
     onSelect: () => void;
@@ -336,7 +349,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                 <Share2 className="w-5 h-5 mr-2" />
                 공유하기
               </Button>
-              <Button variant="outline" size="lg" className="px-8">
+              <Button variant="outline" size="lg" className="px-8" onClick={handleCourseRecommendation}>
                 <Route className="w-5 h-5 mr-2" />
                 코스추천
               </Button>
