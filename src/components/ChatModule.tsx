@@ -19,6 +19,7 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 /* ---- 타입 --------------------------------------------------------- */
 export interface Message {
@@ -64,7 +65,11 @@ async function callBackend(history: Message[]): Promise<BackendResponse> {
 
   const res = await fetch(`${API_BASE}/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    mode: 'cors',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
     body: JSON.stringify(payload),
   });
 
@@ -287,59 +292,43 @@ const handleSuggestionClick = async (suggestion: string) => {
   return (
     <>
       {/* === 메인 카드 =================================== */}
-      <Card className="h-full flex flex-col shadow-gallery bg-gradient-to-br from-card via-card to-accent/5 border border-border/50">
-        {/* Header */}
-        <div className="p-6 border-b border-border bg-gradient-to-r from-primary/5 to-accent/10 backdrop-blur-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-accent-foreground" />
-              <h2 className="font-medium text-card-foreground">
-                Art Curator AI
-              </h2>
-            </div>
-
-            <Badge
-              variant="secondary"
-              className="text-sm px-3 py-1 flex items-center cursor-pointer"
-              onClick={() => setIsSavedModalOpen(true)}
-            >
-              <Heart className="w-4 h-4 mr-1 fill-current" />
-              {savedCount} Saved
-            </Badge>
-          </div>
-          <p className="text-sm text-muted-foreground mt-1">
-            예술·전시 정보를 무엇이든 물어보세요!
-          </p>
-        </div>
+      <Card className="h-full flex flex-col shadow-none bg-gradient-to-br from-card via-card to-accent/5 border-0 rounded-none">
 
         {/* Messages */}
-        <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
-          <div className="space-y-4">
+        <ScrollArea className="flex-1 p-2 sm:p-3 lg:p-4" ref={scrollAreaRef}>
+          <div className="space-y-2 sm:space-y-3 lg:space-y-4">
             {messages.map((m) => (
               <div
                 key={m.id}
-                className={`flex gap-3 ${
+                className={`flex gap-2 sm:gap-3 ${
                   m.type === 'user' ? 'justify-end' : 'justify-start'
                 }`}
               >
                 {m.type === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot className="w-4 h-4 text-accent-foreground" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <Bot className="w-3 h-3 sm:w-4 sm:h-4 text-accent-foreground" />
                   </div>
                 )}
 
                 <div className="max-w-[80%]">
                   {/* bubble */}
                   <div
-                    className={`p-4 rounded-xl relative ${
+                    className={`p-2 sm:p-3 lg:p-4 rounded-xl relative ${
                       m.type === 'user'
                         ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-elegant'
                         : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {m.content}
-                    </p>
+                    {m.type === 'assistant' ? (
+                      <MarkdownRenderer
+                        content={m.content}
+                        className="text-sm leading-relaxed"
+                      />
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {m.content}
+                      </p>
+                    )}
 
                     {m.type === 'assistant' && (
                       <Button
@@ -363,14 +352,14 @@ const handleSuggestionClick = async (suggestion: string) => {
 
                   {/* (선택) suggestions */}
                   {m.suggestions && (
-                    <div className="mt-2 flex flex-wrap gap-1">
+                    <div className="mt-1 sm:mt-2 flex flex-wrap gap-1">
                       {m.suggestions.map((s, i) => (
                         <Button
                           key={i}
                           variant="outline"
                           size="sm"
                           onClick={() => handleSuggestionClick(s)}
-                          className="text-xs h-7 px-2"
+                          className="text-xs h-6 sm:h-7 px-1 sm:px-2"
                         >
                           {s}
                         </Button>
@@ -406,8 +395,8 @@ const handleSuggestionClick = async (suggestion: string) => {
         </ScrollArea>
 
         {/* Input */}
-        <div className="p-4 border-t border-border bg-gradient-to-r from-background to-accent/5">
-          <div className="flex gap-2">
+        <div className="p-2 sm:p-3 lg:p-4 border-t border-border bg-gradient-to-r from-background to-accent/5">
+          <div className="flex gap-1 sm:gap-2">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -445,7 +434,10 @@ const handleSuggestionClick = async (suggestion: string) => {
                   key={msg.id}
                   className="p-3 border rounded-lg bg-accent/5 text-sm relative"
                 >
-                  {msg.content}
+                  <MarkdownRenderer
+                    content={msg.content}
+                    className="text-sm pr-8"
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
