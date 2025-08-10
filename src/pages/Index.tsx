@@ -14,8 +14,9 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy } from 'lucide-react';
+import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy, Share2, ChevronDown, ChevronUp } from 'lucide-react';
 import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 
 interface Artwork {
@@ -41,6 +42,7 @@ const Index = () => {
   const [savedMessagesCount, setSavedMessagesCount] = useState(0);
   const [savedMessages, setSavedMessages] = useState<Message[]>([]);
   const [showSavedModal, setShowSavedModal] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
 
   const exhibitions = exhibitionsData;
 
@@ -100,6 +102,81 @@ const Index = () => {
     setSavedMessages(messages);
   };
 
+  const handleShareMessage = async (message: Message) => {
+    const shareText = `Artemia AI 추천:\n\n${message.content}\n\n전시 추천 서비스 - Artemia: Art Curator AI`;
+    
+    try {
+      if (navigator.share && navigator.canShare({ text: shareText })) {
+        await navigator.share({
+          title: 'Artemia AI 전시 추천',
+          text: shareText
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        // You could add a toast notification here
+        alert('메시지가 클립보드에 복사되었습니다!');
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('메시지가 클립보드에 복사되었습니다!');
+      } catch (clipboardErr) {
+        console.error('Clipboard copy failed:', clipboardErr);
+      }
+    }
+  };
+
+  const handleShareAllMessages = async () => {
+    if (savedMessages.length === 0) return;
+    
+    const allMessagesText = savedMessages
+      .map((msg, index) => `${index + 1}. ${msg.content}`)
+      .join('\n\n');
+    
+    const shareText = `Artemia AI 저장된 추천들:\n\n${allMessagesText}\n\n전시 추천 서비스 - Artemia: Art Curator AI`;
+    
+    try {
+      if (navigator.share && navigator.canShare({ text: shareText })) {
+        await navigator.share({
+          title: `Artemia AI 저장된 메시지 ${savedMessages.length}개`,
+          text: shareText
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        alert('모든 메시지가 클립보드에 복사되었습니다!');
+      }
+    } catch (err) {
+      console.error('Share failed:', err);
+      try {
+        await navigator.clipboard.writeText(shareText);
+        alert('모든 메시지가 클립보드에 복사되었습니다!');
+      } catch (clipboardErr) {
+        console.error('Clipboard copy failed:', clipboardErr);
+      }
+    }
+  };
+
+  const toggleMessageExpansion = (messageId: string) => {
+    setExpandedMessages(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(messageId)) {
+        newSet.delete(messageId);
+      } else {
+        newSet.add(messageId);
+      }
+      return newSet;
+    });
+  };
+
+  const getMessagePreview = (content: string, maxLength: number = 200) => {
+    if (content.length <= maxLength) return content;
+    return content.substring(0, maxLength) + '...';
+  };
+
+  const isLongMessage = (content: string) => content.length > 200;
+
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       {/* Hero Section */}
@@ -123,9 +200,6 @@ const Index = () => {
               </h1>
             </div>
             
-            <p className="text-sm sm:text-base lg:text-lg text-primary-foreground/80 mb-3 sm:mb-4 lg:mb-6 leading-relaxed">
-              전시 추천 주변 관광지 추천 서비스
-            </p>
 
             <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4">
               <Button
@@ -203,40 +277,112 @@ const Index = () => {
         />
       )}
 
-      {/* Saved Messages Modal */}
+      {/* Saved Messages Modal - Fullscreen */}
       <Dialog open={showSavedModal} onOpenChange={setShowSavedModal}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Saved Messages</DialogTitle>
-            <DialogDescription>
-              These are the messages you've marked as favorite.
+        <DialogContent className="max-w-none w-full h-full max-h-none p-0 gap-0">
+          <DialogHeader className="p-4 sm:p-6 border-b text-center">
+            <DialogTitle className="text-xl sm:text-2xl font-medium text-center">저장된 메시지</DialogTitle>
+            <DialogDescription className="text-center">
+              즐겨찾기로 저장한 메시지들을 확인하고 공유할 수 있습니다.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3 max-h-[300px] overflow-y-auto">
-            {savedMessages.length > 0 ? (
-              savedMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="p-3 border rounded-lg bg-accent/5 text-sm"
-                >
-                  {msg.content}
+          <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
+            <div className="space-y-4 max-w-4xl mx-auto">
+              {savedMessages.length > 0 ? (
+                savedMessages.map((msg) => {
+                  const isExpanded = expandedMessages.has(msg.id);
+                  const isLong = isLongMessage(msg.content);
+                  const contentToShow = isLong && !isExpanded 
+                    ? getMessagePreview(msg.content) 
+                    : msg.content;
+                  
+                  return (
+                    <div
+                      key={msg.id}
+                      className={`border rounded-xl bg-gradient-to-r from-card to-accent/5 shadow-sm transition-all duration-300 ${
+                        isLong && !isExpanded 
+                          ? 'p-3 sm:p-4' 
+                          : 'p-4 sm:p-6'
+                      }`}
+                    >
+                      <MarkdownRenderer
+                        content={contentToShow}
+                        className={isLong && !isExpanded ? "text-xs sm:text-sm" : "text-sm sm:text-base"}
+                      />
+                      
+                      {isLong && (
+                        <div className="mt-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleMessageExpansion(msg.id)}
+                            className="text-xs text-primary hover:text-primary/80 p-0 h-auto"
+                          >
+                            {isExpanded ? (
+                              <>
+                                <ChevronUp className="w-3 h-3 mr-1" />
+                                접기
+                              </>
+                            ) : (
+                              <>
+                                <ChevronDown className="w-3 h-3 mr-1" />
+                                더보기
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
+                      
+                      <div className="mt-4 flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+                        <span>{new Date(msg.timestamp).toLocaleString('ko-KR')}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleShareMessage(msg)}
+                          className="text-xs"
+                        >
+                          <Share2 className="w-3 h-3 mr-1" />
+                          공유
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
+                  <p className="text-muted-foreground text-lg mb-2">
+                    저장된 메시지가 없습니다
+                  </p>
+                  <p className="text-muted-foreground/60 text-sm">
+                    AI 응답에서 ❤️ 버튼을 눌러 메시지를 저장해보세요
+                  </p>
                 </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                No saved messages yet.
-              </p>
-            )}
+              )}
+            </div>
           </div>
 
-          <DialogFooter>
-            <Button
-              variant="secondary"
-              onClick={() => setShowSavedModal(false)}
-            >
-              Close
-            </Button>
+          <DialogFooter className="p-4 sm:p-6 border-t">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full justify-center">
+              {savedMessages.length > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={handleShareAllMessages}
+                  className="flex-1 sm:flex-none"
+                >
+                  <Share2 className="w-4 h-4 mr-2" />
+                  모든 메시지 공유하기
+                </Button>
+              )}
+              <Button
+                variant="secondary"
+                onClick={() => setShowSavedModal(false)}
+                className="flex-1 sm:flex-none"
+              >
+                닫기
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
