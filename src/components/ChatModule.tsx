@@ -38,6 +38,7 @@ interface ChatModuleProps {
 }
 
 /* ---- 환경변수: API End-Point -------------------------------------- */
+// 별도의 API URL이 주어지지 않을 경우 localhost의 8000번 포트를 호출합니다.
 const API_BASE =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
