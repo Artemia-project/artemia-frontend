@@ -32,7 +32,7 @@ export const exhibitionsData: Exhibition[] =
     "theme": "미디어아트",
     "start": "2025-03-27",
     "end": "2025-12-31",
-    "image": "https://www.kh.or.kr/jnrepo/upload/jnPrgCalendarContents/202502/530d027799da40dcba89e9d78d575cef_1740545541279.png",
+    "image": "https://pbs.twimg.com/media/Gk2G5aEaoAARUQu?format=jpg&name=360x360",
     "location": "창경궁",
     "link": "https://www.kh.or.kr/cont/view/fest/month/menu/210?thisPage=1&idx=109969&searchCategory1=600&searchCategory2=&searchCategory3=&searchField=all&searchDate=202503&weekSel=undefined&searchType=&searchText=",
     "cost": "무료"

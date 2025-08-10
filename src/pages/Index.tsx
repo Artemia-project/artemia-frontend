@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ChatModule, type Message } from '@/components/ChatModule';
 import { ComparisonView } from '@/components/ComparisonView';
 import { ExhibitionWorldCup } from '@/components/ExhibitionWorldCup';
@@ -45,6 +45,9 @@ const Index = () => {
   const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
 
   const exhibitions = exhibitionsData;
+  
+  // Memoize the sliced exhibitions to prevent infinite re-renders
+  const worldCupExhibitions = useMemo(() => exhibitions.slice(0, 16), [exhibitions]);
 
   function handleSaveArtwork(artwork: Artwork) {
     setSavedArtworks(prev => {
@@ -74,11 +77,7 @@ const Index = () => {
   };
 
   const handleWorldCupClick = () => {
-    console.log('🏆 World Cup button clicked!');
-    console.log('📊 Exhibitions ready:', exhibitions.length);
-    
     if (exhibitions.length >= 16) {
-      alert(`🎉 Tournament ready! ${exhibitions.length} exhibitions loaded.`);
       setShowWorldCup(true);
     } else {
       alert(`⚠️ Need 16 exhibitions for tournament. Currently have: ${exhibitions.length}`);
@@ -263,7 +262,7 @@ const Index = () => {
       {/* Exhibition World Cup Modal */}
       {showWorldCup && (
         <ExhibitionWorldCup
-          exhibitions={exhibitions.slice(0, 16)}
+          exhibitions={worldCupExhibitions}
           onClose={() => setShowWorldCup(false)}
           onSendMessage={handleSendMessageToChat}
         />
