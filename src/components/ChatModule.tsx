@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/dialog';
 
 /* ---- 타입 --------------------------------------------------------- */
-interface Message {
+export interface Message {
   id: string;
   type: 'user' | 'assistant';
   content: string;
@@ -31,7 +31,10 @@ interface Message {
 }
 
 interface ChatModuleProps {
-  onArtworkRecommendation?: (artwork: any) => void; /* 확장용 */
+  onArtworkRecommendation?: (artwork: any) => void;
+  externalMessage?: string;
+  onMessageSent?: () => void;
+  onSavedMessagesChange?: (count: number, messages: Message[]) => void;
 }
 
 /* ---- 환경변수: API End-Point -------------------------------------- */
@@ -79,7 +82,10 @@ async function callBackend(history: Message[]): Promise<BackendResponse> {
 /*                        ChatModule 컴포넌트                           */
 /* =================================================================== */
 export const ChatModule: React.FC<ChatModuleProps> = ({
-  onArtworkRecommendation
+  onArtworkRecommendation,
+  externalMessage,
+  onMessageSent,
+  onSavedMessagesChange
 }) => {
   /* ---------------- state --------------------------------------- */
   const [messages, setMessages] = useState<Message[]>([
@@ -104,92 +110,121 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
 
   /* ---------------- auto-scroll --------------------------------- */
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
-    }
+    const scrollToBottom = () => {
+      if (scrollAreaRef.current) {
+        const scrollElement = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+        if (scrollElement) {
+          scrollElement.scrollTop = scrollElement.scrollHeight;
+        }
+      }
+    };
+
+    // Small delay to ensure DOM is updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages]);
 
+  /* ---------------- external message handling ------------------- */
+  useEffect(() => {
+    if (externalMessage) {
+      const sendExternalMessage = async () => {
+        const userMessage: Message = {
+          id: Date.now().toString(),
+          type: 'user',
+          content: externalMessage,
+          timestamp: new Date()
+        };
+
+        const nextHistory = [...messages, userMessage];
+        setMessages(nextHistory);
+        setIsLoading(true);
+
+        try {
+          const data = await callBackend(nextHistory);
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            type: 'assistant',
+            content: data.final_answer,
+            timestamp: new Date(),
+            suggestions: [
+              '상세한 코스 일정 짜줘',
+              '교통편 정보도 알려줘',
+              '비슷한 다른 전시 추천해줘',
+              '근처 맛집도 알려줘'
+            ]
+          };
+          setMessages(prev => [...prev, assistantMessage]);
+        } catch (err: any) {
+          toast({
+            title: '백엔드 오류',
+            description: err?.message ?? '요청 중 오류가 발생했어요.',
+            variant: 'destructive',
+          });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      sendExternalMessage();
+      
+      if (onMessageSent) {
+        onMessageSent();
+      }
+    }
+  }, [externalMessage]);
+
   /* ---------------- 파생 ------------------------------ */
-  const savedMessages = messages.filter((m) => m.isSaved);
+  const savedMessages = messages.filter((msg) => msg.isSaved);
   const savedCount = savedMessages.length;
 
-  /* ---------------- 메시지 전송 로직 ------------------- */
-  const sendQuestion = async (question: string) => {
-    /* ① 유저 메시지 추가 */
+  useEffect(() => {
+    if (onSavedMessagesChange) {
+      onSavedMessagesChange(savedCount, savedMessages);
+    }
+  }, [savedCount, savedMessages, onSavedMessagesChange]);
+
+  /* ---------------- handlers --------------------------- */
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
+
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: question,
-      timestamp: new Date()
+      content: inputValue,
+      timestamp: new Date(),
     };
-    setMessages((prev) => [...prev, userMessage]);
+
+    const nextHistory = [...messages, userMessage];
+    setMessages(nextHistory);
+    setInputValue('');
     setIsLoading(true);
 
-    /* ② 백엔드 호출 */
     try {
-      const data = await callBackend(question);
-
-      /* ③ assistant 메시지 추가 */
+      const data = await callBackend(nextHistory);
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'assistant',
         content: data.final_answer,
-        timestamp: new Date()
-        // suggestions: ...  (cards 데이터를 이용해 만들고 싶다면 여기에)
+        timestamp: new Date(),
+        suggestions: [
+          '비슷한 코스 더 추천',
+          '아이 동선만 짧게 요약해줘',
+          '근처 무료 전시 알려줘',
+          '지도 링크도 같이 줘',
+        ],
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages(prev => [...prev, assistantMessage]);
     } catch (err: any) {
-      console.error(err);
       toast({
-        title: '오류',
-        description: err.message ?? '서버 통신에 실패했습니다.'
+        title: '백엔드 오류',
+        description: err?.message ?? '요청 중 오류가 발생했어요.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  /* ---------------- handlers --------------------------- */
-  const handleSendMessage = async () => {
-  if (!inputValue.trim() || isLoading) return;
-
-  const userMessage: Message = {
-    id: Date.now().toString(),
-    type: 'user',
-    content: inputValue,
-    timestamp: new Date(),
-  };
-
-  const nextHistory = [...messages, userMessage]; // ⭐ 히스토리 업데이트본
-  setMessages(nextHistory);
-  setInputValue('');
-  setIsLoading(true);
-
-  try {
-    const data = await callBackend(nextHistory); // ⭐ 히스토리 전체 전달
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      type: 'assistant',
-      content: data.final_answer,
-      timestamp: new Date(),
-      suggestions: [
-        '비슷한 코스 더 추천',
-        '아이 동선만 짧게 요약해줘',
-        '근처 무료 전시 알려줘',
-        '지도 링크도 같이 줘',
-      ],
-    };
-    setMessages(prev => [...prev, assistantMessage]);
-  } catch (err: any) {
-    toast({
-      title: '백엔드 오류',
-      description: err?.message ?? '요청 중 오류가 발생했어요.',
-      variant: 'destructive',
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
 
 const handleSuggestionClick = async (suggestion: string) => {
   if (isLoading) return;

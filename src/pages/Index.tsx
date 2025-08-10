@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
-import { ChatModule } from '@/components/ChatModule';
-import { ArtworkGrid } from '@/components/ArtworkGrid';
+import { ChatModule, type Message } from '@/components/ChatModule';
 import { ComparisonView } from '@/components/ComparisonView';
+import { ExhibitionWorldCup } from '@/components/ExhibitionWorldCup';
+import { ExhibitionGallery } from '@/components/ExhibitionGallery';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Sparkles, Palette, Eye, Heart, ArrowLeftRight } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy } from 'lucide-react';
+import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 
 interface Artwork {
@@ -25,8 +35,16 @@ const Index = () => {
   const [savedArtworks, setSavedArtworks] = useState<Artwork[]>([]);
   const [comparisonArtworks, setComparisonArtworks] = useState<Artwork[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [showWorldCup, setShowWorldCup] = useState(false);
+  const [showExhibitionGallery, setShowExhibitionGallery] = useState(false);
+  const [externalChatMessage, setExternalChatMessage] = useState<string>('');
+  const [savedMessagesCount, setSavedMessagesCount] = useState(0);
+  const [savedMessages, setSavedMessages] = useState<Message[]>([]);
+  const [showSavedModal, setShowSavedModal] = useState(false);
 
-  const handleSaveArtwork = (artwork: Artwork) => {
+  const exhibitions = exhibitionsData;
+
+  function handleSaveArtwork(artwork: Artwork) {
     setSavedArtworks(prev => {
       const exists = prev.find(item => item.id === artwork.id);
       if (exists) {
@@ -34,7 +52,7 @@ const Index = () => {
       }
       return [...prev, artwork];
     });
-  };
+  }
 
   const handleCompareArtwork = (artwork: Artwork) => {
     setComparisonArtworks(prev => {
@@ -53,10 +71,39 @@ const Index = () => {
     });
   };
 
+  const handleWorldCupClick = () => {
+    console.log('🏆 World Cup button clicked!');
+    console.log('📊 Exhibitions ready:', exhibitions.length);
+    
+    if (exhibitions.length >= 16) {
+      alert(`🎉 Tournament ready! ${exhibitions.length} exhibitions loaded.`);
+      setShowWorldCup(true);
+    } else {
+      alert(`⚠️ Need 16 exhibitions for tournament. Currently have: ${exhibitions.length}`);
+    }
+  };
+
+  const handleStartExploring = () => {
+    setShowExhibitionGallery(true);
+  };
+
+  const handleSendMessageToChat = (message: string) => {
+    setExternalChatMessage(message);
+  };
+
+  const handleChatMessageSent = () => {
+    setExternalChatMessage('');
+  };
+
+  const handleSavedMessagesChange = (count: number, messages: Message[]) => {
+    setSavedMessagesCount(count);
+    setSavedMessages(messages);
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80">
+      <section className="flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80">
         <div className="absolute inset-0">
           <img
             src={heroArtwork}
@@ -66,107 +113,63 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
         </div>
         
-        <div className="relative container mx-auto px-4 py-20">
+        <div className="relative container mx-auto px-4 py-12">
           <div className="max-w-3xl mx-auto text-center text-primary-foreground">
-            <div className="inline-flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6">
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">AI-Powered Art Curation</span>
+            
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="w-6 h-6 text-primary-foreground" />
+              <h1 className="text-4xl md:text-5xl font-light leading-tight">
+                Artemia: Art Curator AI
+              </h1>
             </div>
             
-            <h1 className="text-5xl md:text-6xl font-light mb-6 leading-tight">
-              Discover Art That
-              <span className="block text-gradient font-normal">Speaks to You</span>
-            </h1>
-            
-            <p className="text-xl text-primary-foreground/80 mb-8 leading-relaxed">
-              Your personal AI curator helps you explore, understand, and curate art exhibitions tailored to your taste and knowledge level.
+            <p className="text-lg text-primary-foreground/80 mb-6 leading-relaxed">
+              전시 추천 주변 관광지 추천 서비스
             </p>
-            
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="secondary" size="lg" className="px-8">
-                <Palette className="w-5 h-5 mr-2" />
-                Start Exploring Art
+
+            <div className="flex flex-wrap justify-center gap-4">
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                onClick={handleWorldCupClick}
+              >
+                <Trophy className="w-5 h-5 mr-2" />
+                내 전시 월드컵
               </Button>
-              <Button variant="outline" size="lg" className="px-8 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20">
+
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                onClick={handleStartExploring}
+              >
                 <Eye className="w-5 h-5 mr-2" />
-                View Collections
+                둘러보기
+              </Button>
+                          
+              <Button
+                variant="outline"
+                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                onClick={() => setShowSavedModal(true)}
+              >
+                <Heart className={`w-4 h-4 mr-2 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
+                {savedMessagesCount} 저장된 메세지
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-8 border-b border-border bg-gradient-to-r from-card to-accent/5">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap justify-center gap-8 text-center">
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <Heart className="w-4 h-4 mr-1 fill-current" />
-                {savedArtworks.length} Saved
-              </Badge>
-            </div>
-            <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-sm px-3 py-1">
-                <ArrowLeftRight className="w-4 h-4 mr-1" />
-                {comparisonArtworks.length}/2 Selected
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Main Content */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <ChatModule onArtworkRecommendation={handleSaveArtwork} />
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-gradient-to-r from-accent/5 to-accent/10 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-normal text-foreground mb-4">
-              Curate Like a Professional
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Our AI understands art history, movements, and individual preferences to provide personalized curation guidance.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Sparkles className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">AI-Powered Insights</h3>
-              <p className="text-muted-foreground">
-                Get personalized recommendations based on art movements, techniques, and your preferences.
-              </p>
-            </Card>
-
-            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <ArrowLeftRight className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Compare & Contrast</h3>
-              <p className="text-muted-foreground">
-                Analyze artworks side-by-side to understand artistic evolution and stylistic differences.
-              </p>
-            </Card>
-
-            <Card className="p-6 text-center shadow-elegant transition-elegant hover:shadow-gallery">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Build Collections</h3>
-              <p className="text-muted-foreground">
-                Save your favorite pieces and create themed collections for future exhibitions.
-              </p>
-            </Card>
+      <section className="flex-1 flex flex-col min-h-0">
+        <div className="container mx-auto px-4 flex-1 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col py-6 min-h-0">
+            <ChatModule 
+              onArtworkRecommendation={handleSaveArtwork}
+              externalMessage={externalChatMessage}
+              onMessageSent={handleChatMessageSent}
+              onSavedMessagesChange={handleSavedMessagesChange}
+            />
           </div>
         </div>
       </section>
@@ -181,6 +184,61 @@ const Index = () => {
           }}
         />
       )}
+
+      {/* Exhibition World Cup Modal */}
+      {showWorldCup && (
+        <ExhibitionWorldCup
+          exhibitions={exhibitions.slice(0, 16)}
+          onClose={() => setShowWorldCup(false)}
+          onSendMessage={handleSendMessageToChat}
+        />
+      )}
+
+      {/* Exhibition Gallery Modal */}
+      {showExhibitionGallery && (
+        <ExhibitionGallery
+          exhibitions={exhibitions}
+          onClose={() => setShowExhibitionGallery(false)}
+        />
+      )}
+
+      {/* Saved Messages Modal */}
+      <Dialog open={showSavedModal} onOpenChange={setShowSavedModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Saved Messages</DialogTitle>
+            <DialogDescription>
+              These are the messages you've marked as favorite.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            {savedMessages.length > 0 ? (
+              savedMessages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className="p-3 border rounded-lg bg-accent/5 text-sm"
+                >
+                  {msg.content}
+                </div>
+              ))
+            ) : (
+              <p className="text-muted-foreground text-sm">
+                No saved messages yet.
+              </p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="secondary"
+              onClick={() => setShowSavedModal(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
