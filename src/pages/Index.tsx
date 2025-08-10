@@ -113,46 +113,51 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
         </div>
         
-        <div className="relative container mx-auto px-4 py-12">
+        <div className="relative container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-12">
           <div className="max-w-3xl mx-auto text-center text-primary-foreground">
             
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Sparkles className="w-6 h-6 text-primary-foreground" />
-              <h1 className="text-4xl md:text-5xl font-light leading-tight">
+            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-2 sm:mb-4">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-primary-foreground" />
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light leading-tight">
                 Artemia: Art Curator AI
               </h1>
             </div>
             
-            <p className="text-lg text-primary-foreground/80 mb-6 leading-relaxed">
+            <p className="text-sm sm:text-base lg:text-lg text-primary-foreground/80 mb-3 sm:mb-4 lg:mb-6 leading-relaxed">
               전시 추천 주변 관광지 추천 서비스
             </p>
 
-            <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4">
               <Button
                 variant="outline"
-                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                size="sm"
+                className="px-2 py-1 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-xs sm:text-sm lg:text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
                 onClick={handleWorldCupClick}
               >
-                <Trophy className="w-5 h-5 mr-2" />
-                내 전시 월드컵
+                <Trophy className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">내 전시 월드컵</span>
+                <span className="sm:hidden">월드컵</span>
               </Button>
 
               <Button
                 variant="outline"
-                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                size="sm"
+                className="px-2 py-1 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-xs sm:text-sm lg:text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
                 onClick={handleStartExploring}
               >
-                <Eye className="w-5 h-5 mr-2" />
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
                 둘러보기
               </Button>
                           
               <Button
                 variant="outline"
-                className="px-4 py-2 text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                size="sm"
+                className="px-2 py-1 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-xs sm:text-sm lg:text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
                 onClick={() => setShowSavedModal(true)}
               >
-                <Heart className={`w-4 h-4 mr-2 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
-                {savedMessagesCount} 저장된 메세지
+                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
+                <span className="hidden sm:inline">{savedMessagesCount} 저장된 메세지</span>
+                <span className="sm:hidden">{savedMessagesCount} 저장</span>
               </Button>
             </div>
           </div>
@@ -160,18 +165,14 @@ const Index = () => {
       </section>
 
 
-      {/* Main Content */}
-      <section className="flex-1 flex flex-col min-h-0">
-        <div className="container mx-auto px-4 flex-1 flex flex-col min-h-0">
-          <div className="flex-1 flex flex-col py-6 min-h-0">
-            <ChatModule 
-              onArtworkRecommendation={handleSaveArtwork}
-              externalMessage={externalChatMessage}
-              onMessageSent={handleChatMessageSent}
-              onSavedMessagesChange={handleSavedMessagesChange}
-            />
-          </div>
-        </div>
+      {/* Main Content - Chat fills all remaining space */}
+      <section className="flex-1 min-h-0">
+        <ChatModule 
+          onArtworkRecommendation={handleSaveArtwork}
+          externalMessage={externalChatMessage}
+          onMessageSent={handleChatMessageSent}
+          onSavedMessagesChange={handleSavedMessagesChange}
+        />
       </section>
 
       {/* Comparison Modal */}
