@@ -134,20 +134,25 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
   }, [messages]);
 
   /* ---------------- external message handling ------------------- */
+  // in ChatModule.tsx (replace the previous useEffect for externalMessage)
   useEffect(() => {
-    if (externalMessage) {
-      const sendExternalMessage = async () => {
-        const userMessage: Message = {
-          id: Date.now().toString(),
-          type: 'user',
-          content: externalMessage,
-          timestamp: new Date()
-        };
+    if (!externalMessage) return;
 
-        const nextHistory = [...messages, userMessage];
-        setMessages(nextHistory);
-        setIsLoading(true);
+    // Do everything against the latest state using functional updates
+    setIsLoading(true);
 
+    setMessages(prevMessages => {
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        type: 'user',
+        content: externalMessage,
+        timestamp: new Date()
+      };
+
+      const nextHistory = [...prevMessages, userMessage];
+
+      // fire-and-forget async call, will append assistant message when done
+      (async () => {
         try {
           const data = await callBackend(nextHistory);
           const assistantMessage: Message = {
@@ -172,15 +177,16 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
         } finally {
           setIsLoading(false);
         }
-      };
+      })();
 
-      sendExternalMessage();
-      
-      if (onMessageSent) {
-        onMessageSent();
-      }
-    }
-  }, [externalMessage, messages, onMessageSent]);
+      // return the messages with the user message appended synchronously
+      return nextHistory;
+    });
+
+    if (onMessageSent) onMessageSent();
+    // IMPORTANT: do not include `messages` in deps to avoid effect loop
+  }, [externalMessage, onMessageSent]);
+
 
   /* ---------------- 파생 ------------------------------ */
   const savedMessages = messages.filter((msg) => msg.isSaved);
