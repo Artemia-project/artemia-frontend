@@ -19,6 +19,7 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
+import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
 /* ---- 타입 --------------------------------------------------------- */
 export interface Message {
@@ -39,7 +40,7 @@ interface ChatModuleProps {
 
 /* ---- 환경변수: API End-Point -------------------------------------- */
 const API_BASE =
-  import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+  import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 /* ---- 유틸: 백엔드 호출 ------------------------------------------- */
 type BackendResponse = { final_answer: string; cards: unknown[] };
@@ -61,7 +62,11 @@ async function callBackend(history: Message[]): Promise<BackendResponse> {
 
   const res = await fetch(`${API_BASE}/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    mode: 'cors',
+    headers: { 
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
     body: JSON.stringify(payload),
   });
 
@@ -311,9 +316,16 @@ const handleSuggestionClick = async (suggestion: string) => {
                         : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery'
                     }`}
                   >
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                      {m.content}
-                    </p>
+                    {m.type === 'assistant' ? (
+                      <MarkdownRenderer
+                        content={m.content}
+                        className="text-sm leading-relaxed"
+                      />
+                    ) : (
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                        {m.content}
+                      </p>
+                    )}
 
                     {m.type === 'assistant' && (
                       <Button
@@ -419,7 +431,10 @@ const handleSuggestionClick = async (suggestion: string) => {
                   key={msg.id}
                   className="p-3 border rounded-lg bg-accent/5 text-sm relative"
                 >
-                  {msg.content}
+                  <MarkdownRenderer
+                    content={msg.content}
+                    className="text-sm pr-8"
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
