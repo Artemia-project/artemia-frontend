@@ -31,7 +31,7 @@ export interface Message {
 }
 
 interface ChatModuleProps {
-  onArtworkRecommendation?: (artwork: any) => void;
+  onArtworkRecommendation?: (artwork: unknown) => void;
   externalMessage?: string;
   onMessageSent?: () => void;
   onSavedMessagesChange?: (count: number, messages: Message[]) => void;
@@ -42,7 +42,7 @@ const API_BASE =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 /* ---- 유틸: 백엔드 호출 ------------------------------------------- */
-type BackendResponse = { final_answer: string; cards: any[] };
+type BackendResponse = { final_answer: string; cards: unknown[] };
 
 const MAX_TURNS = 8; // 과도한 페이로드 방지
 
@@ -155,10 +155,10 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
             ]
           };
           setMessages(prev => [...prev, assistantMessage]);
-        } catch (err: any) {
+        } catch (err: unknown) {
           toast({
             title: '백엔드 오류',
-            description: err?.message ?? '요청 중 오류가 발생했어요.',
+            description: err instanceof Error ? err.message : '요청 중 오류가 발생했어요.',
             variant: 'destructive',
           });
         } finally {
@@ -172,7 +172,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
         onMessageSent();
       }
     }
-  }, [externalMessage]);
+  }, [externalMessage, messages, onMessageSent]);
 
   /* ---------------- 파생 ------------------------------ */
   const savedMessages = messages.filter((msg) => msg.isSaved);
@@ -218,7 +218,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
     } catch (err: any) {
       toast({
         title: '백엔드 오류',
-        description: err?.message ?? '요청 중 오류가 발생했어요.',
+        description: err instanceof Error ? err.message : '요청 중 오류가 발생했어요.',
         variant: 'destructive',
       });
     } finally {
@@ -252,7 +252,7 @@ const handleSuggestionClick = async (suggestion: string) => {
   } catch (err: any) {
     toast({
       title: '백엔드 오류',
-      description: err?.message ?? '요청 중 오류가 발생했어요.',
+      description: err instanceof Error ? err.message : '요청 중 오류가 발생했어요.',
       variant: 'destructive',
     });
   } finally {
