@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Sparkles, Bot, Heart } from 'lucide-react';
+import { Send, Sparkles, Bot } from 'lucide-react';
 import artemiaLogo from '@/assets/Artemia_logo.gif';
 import { toast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,22 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+
+// Custom Heart component with rounded style
+const Heart = ({ className, ...props }: { className?: string; [key: string]: any }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    {...props}
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+  </svg>
+);
 
 /* ---- 타입 --------------------------------------------------------- */
 export interface Message {
@@ -102,7 +118,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
       id: 'welcome',
       type: 'assistant',
       content:
-        "안녕하세요! 저는 전시·예술 큐레이터 AI예요. 궁금한 점을 질문해 보세요 😉",
+        "안녕하세요! 저는 전시·예술 큐레이터 AI입니다. 궁금한 점을 질문해 보세요 😉",
       timestamp: new Date(),
       suggestions: [
         '이번 주말에 볼 만한 전시 추천해줘',
@@ -221,7 +237,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
         content: data.final_answer,
         timestamp: new Date(),
         suggestions: [
-          '비슷한 코스 더 추천해줘',
           '근처 무료 전시 알려줘',
         ],
       };
@@ -308,11 +323,11 @@ const handleSuggestionClick = async (suggestion: string) => {
                 }`}
               >
                 {m.type === 'assistant' && (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-1 border border-accent/20">
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center flex-shrink-0 mt-1">
                     <img 
                       src={artemiaLogo} 
                       alt="Artemia" 
-                      className="w-4 h-4 sm:w-5 sm:h-5 object-contain rounded-full"
+                      className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
                     />
                   </div>
                 )}
@@ -329,10 +344,10 @@ const handleSuggestionClick = async (suggestion: string) => {
                     {m.type === 'assistant' ? (
                       <MarkdownRenderer
                         content={m.content}
-                        className="text-sm leading-relaxed"
+                        className="text-xs leading-relaxed"
                       />
                     ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs leading-relaxed whitespace-pre-wrap">
                         {m.content}
                       </p>
                     )}
@@ -366,7 +381,7 @@ const handleSuggestionClick = async (suggestion: string) => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleSuggestionClick(s)}
-                          className="text-xs h-6 sm:h-7 px-1 sm:px-2"
+                          className="text-xs h-5 sm:h-6 px-1 sm:px-2"
                         >
                           {s}
                         </Button>
@@ -380,11 +395,11 @@ const handleSuggestionClick = async (suggestion: string) => {
             {/* 로딩 애니메이션 */}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-accent/20">
+                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
                   <img 
                     src={artemiaLogo} 
                     alt="Artemia" 
-                    className="w-5 h-5 object-contain rounded-full"
+                    className="w-8 h-8 object-contain"
                   />
                 </div>
                 <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
@@ -413,7 +428,7 @@ const handleSuggestionClick = async (suggestion: string) => {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="궁금한 전시·예술 정보를 입력하세요"
-              className="flex-1"
+              className="flex-1 text-xs"
               disabled={isLoading}
             />
             <Button

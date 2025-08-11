@@ -21,32 +21,32 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         components={{
           // Headings
           h1: ({ children }) => (
-            <h1 className="text-2xl font-bold mb-4 text-foreground border-b border-border pb-2">
+            <h1 className="text-2xl font-light mb-4 text-foreground border-b border-border pb-2">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-xl font-semibold mb-3 mt-6 text-foreground">
+            <h2 className="text-xl font-light mb-3 mt-6 text-foreground">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-lg font-medium mb-2 mt-4 text-foreground">
+            <h3 className="text-lg font-light mb-2 mt-4 text-foreground">
               {children}
             </h3>
           ),
           h4: ({ children }) => (
-            <h4 className="text-base font-medium mb-2 mt-3 text-foreground">
+            <h4 className="text-base font-light mb-2 mt-3 text-foreground">
               {children}
             </h4>
           ),
           h5: ({ children }) => (
-            <h5 className="text-sm font-medium mb-2 mt-3 text-foreground">
+            <h5 className="text-sm font-light mb-2 mt-3 text-foreground">
               {children}
             </h5>
           ),
           h6: ({ children }) => (
-            <h6 className="text-sm font-medium mb-2 mt-3 text-muted-foreground">
+            <h6 className="text-sm font-light mb-2 mt-3 text-muted-foreground">
               {children}
             </h6>
           ),
@@ -112,7 +112,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:text-primary/80 underline underline-offset-2 font-medium transition-colors"
+              className="text-primary hover:text-primary/80 underline underline-offset-2 font-light transition-colors"
             >
               {children}
             </a>
@@ -142,7 +142,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
             </tr>
           ),
           th: ({ children }) => (
-            <th className="px-4 py-2 text-left text-sm font-medium text-foreground border-r border-border last:border-r-0">
+            <th className="px-4 py-2 text-left text-sm font-light text-foreground border-r border-border last:border-r-0">
               {children}
             </th>
           ),
@@ -159,7 +159,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           
           // Strong/Bold
           strong: ({ children }) => (
-            <strong className="font-semibold text-foreground">
+            <strong className="font-light text-foreground">
               {children}
             </strong>
           ),
