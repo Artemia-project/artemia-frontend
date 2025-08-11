@@ -64,18 +64,18 @@ const ExhibitionCard = React.memo(function ExhibitionCard({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-elegant" />
       </div>
 
-      <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
-        <h3 className="font-medium text-xl leading-tight text-card-foreground min-h-[3.5rem] flex items-start">
+      <CardContent className="p-3 md:p-6 space-y-2 md:space-y-3 flex-1 flex flex-col">
+        <h3 className="font-medium text-sm md:text-xl leading-tight text-card-foreground min-h-[2.5rem] md:min-h-[3.5rem] flex items-start">
           <span className="line-clamp-2" style={{ whiteSpace: "pre-line" }}>
             {exhibition.title}
           </span>
         </h3>
 
-        <p className="text-base text-muted-foreground leading-relaxed min-h-[2.5rem] flex items-start">
+        <p className="text-xs md:text-base text-muted-foreground leading-relaxed min-h-[1.5rem] md:min-h-[2.5rem] flex items-start">
           <span className="line-clamp-2">{exhibition.description}</span>
         </p>
 
-        <div className="flex items-center gap-2 text-base text-muted-foreground min-h-[1.25rem]">
+        <div className="flex items-center gap-2 text-xs md:text-base text-muted-foreground min-h-[1rem] md:min-h-[1.25rem]">
           <MapPin className="w-4 h-4 flex-shrink-0" />
           <span className="truncate">{exhibition.location}</span>
         </div>
@@ -108,11 +108,11 @@ export const ExhibitionGallery: React.FC<ExhibitionGalleryProps> = ({
   onClose
 }) => {
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-7xl max-h-[95vh] bg-background rounded-lg shadow-gallery overflow-hidden">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
+      <div className="w-full h-full bg-background overflow-hidden">
         {/* Header with title and close button */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-2xl font-medium">전시 갤러리</h2>
+        <div className="flex items-center justify-between p-4 md:p-6 border-b">
+          <h2 className="text-xl md:text-2xl font-medium">전시 갤러리</h2>
           <button
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -122,8 +122,8 @@ export const ExhibitionGallery: React.FC<ExhibitionGalleryProps> = ({
         </div>
         
         {/* Gallery content */}
-        <div className="p-6 overflow-y-auto max-h-[calc(95vh-80px)]">
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="p-4 md:p-6 overflow-y-auto" style={{height: 'calc(100vh - 80px)'}}>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
             {exhibitions.map((ex) => (
               <ExhibitionCard
                 key={ex.id}

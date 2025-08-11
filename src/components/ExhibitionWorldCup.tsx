@@ -221,8 +221,8 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   /** Champion screen */
   if (isComplete && champion) {
     return (
-      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <Card className="w-[90%] max-w-md p-6 text-center">
+      <div className="fixed inset-0 bg-black/70 z-50">
+        <div className="w-full h-full bg-white p-4 text-center overflow-y-auto flex flex-col justify-center">
           <h2 className="text-2xl font-bold mb-4">🏆 최종 우승</h2>
           {!championImageError ? (
             <img
@@ -243,18 +243,32 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
           <p className="text-sm text-muted-foreground mt-2">
             {champion.description}
           </p>
-          <div className="mt-4 flex gap-2 justify-center">
-            <Button onClick={() => onSendMessage?.(`${champion.title} 전시에 대해 알려줘`)}>
+          <div className="mt-4 flex flex-col md:flex-row gap-2 md:gap-2 md:justify-center">
+            <Button 
+              className="w-full md:w-auto" 
+              size="sm"
+              onClick={() => onSendMessage?.(`${champion.title} 전시에 대해 알려줘`)}
+            >
               챗으로 물어보기
             </Button>
-            <Button variant="secondary" onClick={() => resetTournament(exhibitions)}>
+            <Button 
+              variant="secondary" 
+              className="w-full md:w-auto" 
+              size="sm"
+              onClick={() => resetTournament(exhibitions)}
+            >
               다시하기
             </Button>
-            <Button variant="ghost" onClick={onClose}>
+            <Button 
+              variant="ghost" 
+              className="w-full md:w-auto" 
+              size="sm"
+              onClick={onClose}
+            >
               닫기
             </Button>
           </div>
-        </Card>
+        </div>
       </div>
     );
   }
@@ -272,15 +286,15 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   if (!currentMatch) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-      <div className="w-[95%] max-w-5xl bg-white rounded p-6">
-        <div className="flex justify-between mb-4">
-          <h2 className="text-lg font-bold">{getRoundName(currentRound)}</h2>
-          <Button variant="ghost" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/80 z-50">
+      <div className="w-full h-full bg-white p-4 overflow-y-auto">
+        <div className="flex justify-between items-center mb-3 md:mb-4">
+          <h2 className="text-base md:text-lg font-bold">{getRoundName(currentRound)}</h2>
+          <Button variant="ghost" size="sm" onClick={onClose}>
             닫기
           </Button>
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 md:gap-4">
           <div 
             onClick={() => {
               console.log('🖱️ Card 1 clicked:', currentMatch.exhibition1.title);
@@ -298,7 +312,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                   target.style.display = "none";
                 }}
               />
-              <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-sm">
+              <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-xs md:text-sm">
                 {currentMatch.exhibition1.title}
               </div>
             </div>
@@ -320,13 +334,13 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                   target.style.display = "none";
                 }}
               />
-              <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-sm">
+              <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-xs md:text-sm">
                 {currentMatch.exhibition2.title}
               </div>
             </div>
           </div>
         </div>
-        <div className="mt-4 text-center text-sm text-muted-foreground">
+        <div className="mt-3 md:mt-4 text-center text-xs md:text-sm text-muted-foreground">
           {currentMatchIndex + 1} / {allMatches.filter(m => m.round === currentRound).length}
         </div>
       </div>

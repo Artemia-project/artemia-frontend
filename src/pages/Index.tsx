@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy, Share2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy, Share2, ChevronDown, ChevronUp, X, Copy } from 'lucide-react';
 import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import heroArtwork from '@/assets/hero-artwork.jpg';
@@ -112,18 +112,27 @@ const Index = () => {
         });
       } else {
         await navigator.clipboard.writeText(shareText);
-        // You could add a toast notification here
-        alert('메시지가 클립보드에 복사되었습니다!');
+        alert('메시지가 클립보드에 복사되었습니다! 📋');
       }
     } catch (err) {
       console.error('Share failed:', err);
       // Fallback to clipboard
       try {
         await navigator.clipboard.writeText(shareText);
-        alert('메시지가 클립보드에 복사되었습니다!');
+        alert('메시지가 클립보드에 복사되었습니다! 📋');
       } catch (clipboardErr) {
         console.error('Clipboard copy failed:', clipboardErr);
       }
+    }
+  };
+
+  const handleCopyMessage = async (message: Message) => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      alert('메시지가 클립보드에 복사되었습니다! 📋');
+    } catch (err) {
+      console.error('Copy failed:', err);
+      alert('복사에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -131,10 +140,10 @@ const Index = () => {
     if (savedMessages.length === 0) return;
     
     const allMessagesText = savedMessages
-      .map((msg, index) => `${index + 1}. ${msg.content}`)
+      .map((msg, index) => `📝 ${index + 1}. ${msg.content}`)
       .join('\n\n');
     
-    const shareText = `Artemia AI 저장된 추천들:\n\n${allMessagesText}\n\n전시 추천 서비스 - Artemia: Art Curator AI`;
+    const shareText = `✨ Artemia AI 저장된 전시 추천 ${savedMessages.length}개\n\n${allMessagesText}\n\n🎨 전시 추천 서비스 - Artemia: Art Curator AI`;
     
     try {
       if (navigator.share && navigator.canShare({ text: shareText })) {
@@ -144,16 +153,32 @@ const Index = () => {
         });
       } else {
         await navigator.clipboard.writeText(shareText);
-        alert('모든 메시지가 클립보드에 복사되었습니다!');
+        alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋✨`);
       }
     } catch (err) {
       console.error('Share failed:', err);
       try {
         await navigator.clipboard.writeText(shareText);
-        alert('모든 메시지가 클립보드에 복사되었습니다!');
+        alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋✨`);
       } catch (clipboardErr) {
         console.error('Clipboard copy failed:', clipboardErr);
       }
+    }
+  };
+
+  const handleCopyAllMessages = async () => {
+    if (savedMessages.length === 0) return;
+    
+    const allMessagesText = savedMessages
+      .map((msg, index) => `${index + 1}. ${msg.content}`)
+      .join('\n\n');
+    
+    try {
+      await navigator.clipboard.writeText(allMessagesText);
+      alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋`);
+    } catch (err) {
+      console.error('Copy failed:', err);
+      alert('복사에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -277,17 +302,28 @@ const Index = () => {
       )}
 
       {/* Saved Messages Modal - Fullscreen */}
-      <Dialog open={showSavedModal} onOpenChange={setShowSavedModal}>
-        <DialogContent className="max-w-none w-full h-full max-h-none p-0 gap-0">
-          <DialogHeader className="p-4 sm:p-6 border-b text-center">
-            <DialogTitle className="text-xl sm:text-2xl font-medium text-center">저장된 메시지</DialogTitle>
-            <DialogDescription className="text-center">
-              즐겨찾기로 저장한 메시지들을 확인하고 공유할 수 있습니다.
-            </DialogDescription>
-          </DialogHeader>
+      {showSavedModal && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
+          <div className="w-full h-full bg-background overflow-hidden">
+            {/* Header with title and close button */}
+            <div className="flex items-center justify-between p-4 md:p-6 border-b">
+              <div className="text-center flex-1">
+                <h2 className="text-xl md:text-2xl font-medium">저장된 메시지</h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  즐겨찾기로 저장한 메시지들을 확인하고 공유할 수 있습니다.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowSavedModal(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors p-1 ml-4"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
-          <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
-            <div className="space-y-4 max-w-4xl mx-auto">
+            {/* Messages content */}
+            <div className="p-4 md:p-6 overflow-y-auto" style={{height: 'calc(100vh - 160px)'}}>
+              <div className="space-y-4 max-w-4xl mx-auto">
               {savedMessages.length > 0 ? (
                 savedMessages.map((msg) => {
                   const isExpanded = expandedMessages.has(msg.id);
@@ -299,24 +335,29 @@ const Index = () => {
                   return (
                     <div
                       key={msg.id}
-                      className={`border rounded-xl bg-gradient-to-r from-card to-accent/5 shadow-sm transition-all duration-300 ${
+                      className={`border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 ${
                         isLong && !isExpanded 
-                          ? 'p-3 sm:p-4' 
-                          : 'p-4 sm:p-6'
+                          ? 'p-3 md:p-4' 
+                          : 'p-4 md:p-6'
                       }`}
                     >
-                      <MarkdownRenderer
-                        content={contentToShow}
-                        className={isLong && !isExpanded ? "text-xs sm:text-sm" : "text-sm sm:text-base"}
-                      />
+                      <div className={isLong && !isExpanded ? "relative" : ""}>
+                        <MarkdownRenderer
+                          content={contentToShow}
+                          className={isLong && !isExpanded ? "text-xs md:text-sm" : "text-sm md:text-base"}
+                        />
+                        {isLong && !isExpanded && (
+                          <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                        )}
+                      </div>
                       
                       {isLong && (
-                        <div className="mt-3">
+                        <div className="mt-3 flex justify-center">
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => toggleMessageExpansion(msg.id)}
-                            className="text-xs text-primary hover:text-primary/80 p-0 h-auto"
+                            className="text-xs hover:bg-gray-100 px-3 py-1 rounded-full border border-gray-200 hover:border-gray-300"
                           >
                             {isExpanded ? (
                               <>
@@ -333,17 +374,28 @@ const Index = () => {
                         </div>
                       )}
                       
-                      <div className="mt-4 flex items-center justify-between text-xs sm:text-sm text-muted-foreground">
+                      <div className="mt-4 flex items-center justify-between text-xs md:text-sm text-muted-foreground border-t pt-3">
                         <span>{new Date(msg.timestamp).toLocaleString('ko-KR')}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleShareMessage(msg)}
-                          className="text-xs"
-                        >
-                          <Share2 className="w-3 h-3 mr-1" />
-                          공유
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopyMessage(msg)}
+                            className="text-xs hover:bg-green-50 hover:text-green-600"
+                          >
+                            <Copy className="w-3 h-3 mr-1" />
+                            복사
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleShareMessage(msg)}
+                            className="text-xs hover:bg-blue-50 hover:text-blue-600"
+                          >
+                            <Share2 className="w-3 h-3 mr-1" />
+                            공유
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -359,32 +411,35 @@ const Index = () => {
                   </p>
                 </div>
               )}
+              </div>
             </div>
-          </div>
 
-          <DialogFooter className="p-4 sm:p-6 border-t">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full justify-center">
-              {savedMessages.length > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={handleShareAllMessages}
-                  className="flex-1 sm:flex-none"
-                >
-                  <Share2 className="w-4 h-4 mr-2" />
-                  모든 메시지 공유하기
-                </Button>
-              )}
-              <Button
-                variant="secondary"
-                onClick={() => setShowSavedModal(false)}
-                className="flex-1 sm:flex-none"
-              >
-                닫기
-              </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            {/* Footer with actions */}
+            {savedMessages.length > 0 && (
+              <div className="border-t p-4 md:p-6">
+                <div className="flex flex-col md:flex-row gap-2 justify-center max-w-4xl mx-auto">
+                  <Button
+                    variant="outline"
+                    onClick={handleCopyAllMessages}
+                    className="flex-1 md:flex-none hover:bg-green-50 hover:text-green-600 hover:border-green-300"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    전체 복사
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleShareAllMessages}
+                    className="flex-1 md:flex-none hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300"
+                  >
+                    <Share2 className="w-4 h-4 mr-2" />
+                    전체 공유
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
