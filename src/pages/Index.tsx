@@ -308,10 +308,7 @@ const Index = () => {
             {/* Header with title and close button */}
             <div className="flex items-center justify-between p-4 md:p-6 border-b">
               <div className="text-center flex-1">
-                <h2 className="text-xl md:text-2xl font-medium">저장된 메시지</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  즐겨찾기로 저장한 메시지들을 확인하고 공유할 수 있습니다.
-                </p>
+                <h2 className="text-xl md:text-2xl font-medium text-left">저장된 메시지</h2>
               </div>
               <button
                 onClick={() => setShowSavedModal(false)}
