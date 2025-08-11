@@ -8,8 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Sparkles, Bot } from 'lucide-react';
-import artemiaLogo from '@/assets/Artemia_logo.gif';
+import { Send, Sparkles, Bot, Heart } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -22,21 +21,6 @@ import {
 } from '@/components/ui/dialog';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
-// Custom Heart component with rounded style
-const Heart = ({ className, ...props }: { className?: string; [key: string]: any }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    {...props}
-  >
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-  </svg>
-);
 
 /* ---- 타입 --------------------------------------------------------- */
 export interface Message {
@@ -310,11 +294,11 @@ const handleSuggestionClick = async (suggestion: string) => {
   return (
     <>
       {/* === 메인 카드 =================================== */}
-      <Card className="h-full flex flex-col shadow-none bg-gradient-to-br from-card via-card to-accent/5 border-0 rounded-none">
+      <Card className="h-full flex flex-col shadow-none bg-gradient-to-br from-card via-card to-accent/5 border-0 rounded-none lg:mx-4 lg:my-2 lg:rounded-lg lg:border lg:shadow-sm">
 
         {/* Messages */}
         <ScrollArea className="flex-1 p-2 sm:p-3 lg:p-4" ref={scrollAreaRef}>
-          <div className="space-y-2 sm:space-y-3 lg:space-y-4">
+          <div className="space-y-2 sm:space-y-3 lg:space-y-4 max-w-3xl mx-auto">
             {messages.map((m) => (
               <div
                 key={m.id}
@@ -323,16 +307,12 @@ const handleSuggestionClick = async (suggestion: string) => {
                 }`}
               >
                 {m.type === 'assistant' && (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center flex-shrink-0 mt-1">
-                    <img 
-                      src={artemiaLogo} 
-                      alt="Artemia" 
-                      className="w-6 h-6 sm:w-8 sm:h-8 object-contain"
-                    />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1 border-2 border-primary/20">
+                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   </div>
                 )}
 
-                <div className="max-w-[80%]">
+                <div className="max-w-[80%] lg:max-w-[70%] xl:max-w-[60%]">
                   {/* bubble */}
                   <div
                     className={`p-2 sm:p-3 lg:p-4 rounded-xl relative ${
@@ -353,22 +333,25 @@ const handleSuggestionClick = async (suggestion: string) => {
                     )}
 
                     {m.type === 'assistant' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleSaveMessage(m.id)}
-                        className={`absolute bottom-2 right-2 h-8 w-8 ${
-                          m.isSaved
-                            ? 'text-red-500 bg-red-50/50'
-                            : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
-                        }`}
-                      >
-                        <Heart
-                          className={`w-4 h-4 ${
-                            m.isSaved ? 'fill-current' : ''
+                      <div className="flex justify-center mt-2 pt-2 border-t border-border/20">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSaveMessage(m.id)}
+                          className={`h-6 px-2 text-xs ${
+                            m.isSaved
+                              ? 'text-red-500 bg-red-50/50'
+                              : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
                           }`}
-                        />
-                      </Button>
+                        >
+                          <Heart
+                            className={`w-3 h-3 mr-1 ${
+                              m.isSaved ? 'fill-current' : ''
+                            }`}
+                          />
+                          {m.isSaved ? '저장됨' : '저장'}
+                        </Button>
+                      </div>
                     )}
                   </div>
 
@@ -395,12 +378,8 @@ const handleSuggestionClick = async (suggestion: string) => {
             {/* 로딩 애니메이션 */}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                  <img 
-                    src={artemiaLogo} 
-                    alt="Artemia" 
-                    className="w-8 h-8 object-contain"
-                  />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 border-2 border-primary/20">
+                  <Bot className="w-5 h-5 text-primary" />
                 </div>
                 <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
                   <div className="flex space-x-1">
@@ -422,7 +401,7 @@ const handleSuggestionClick = async (suggestion: string) => {
 
         {/* Input */}
         <div className="p-2 sm:p-3 lg:p-4 border-t border-border bg-gradient-to-r from-background to-accent/5">
-          <div className="flex gap-1 sm:gap-2">
+          <div className="flex gap-1 sm:gap-2 max-w-3xl mx-auto">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}

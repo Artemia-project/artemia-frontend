@@ -14,27 +14,12 @@ import {
   DialogDescription,
   DialogFooter
 } from '@/components/ui/dialog';
-import { Sparkles, Frame, Eye, ArrowLeftRight, Trophy, Share2, ChevronDown, ChevronUp, X, Copy } from 'lucide-react';
+import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy, Share2, ChevronDown, ChevronUp, X, Copy } from 'lucide-react';
 import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import heroArtwork from '@/assets/hero-artwork.jpg';
 import artemiaLogo from '@/assets/Artemia_logo.gif';
 
-// Custom Heart component with rounded style
-const Heart = ({ className, ...props }: { className?: string; [key: string]: any }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    {...props}
-  >
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-  </svg>
-);
 
 interface Artwork {
   id: string;
@@ -237,14 +222,14 @@ const Index = () => {
         <div className="absolute bottom-20 right-20 w-32 h-32 border border-primary-foreground/10 rounded-full blur-sm opacity-20"></div>
         <div className="absolute top-1/2 right-10 w-16 h-16 border border-primary-foreground/10 rounded-full blur-sm opacity-25"></div>
         
-        <div className="relative container mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        <div className="relative container mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
           <div className="max-w-4xl mx-auto text-center text-primary-foreground">
             
             {/* Main Title */}
-            <div className="mb-3 sm:mb-4 animate-fade-in">
-              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-thin tracking-[0.1em]" 
-                    style={{fontFamily: '"Poppins", "Inter", system-ui, sans-serif'}}>
+            <div className="mb-2 sm:mb-3 animate-fade-in">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extralight tracking-[0.15em]" 
+                    style={{fontFamily: '"Poppins", "Playfair Display", serif'}}>
                   <span className="bg-gradient-to-r from-primary-foreground via-primary-foreground/95 to-primary-foreground bg-clip-text text-transparent drop-shadow-sm">
                     Artemia
                   </span>
@@ -261,32 +246,32 @@ const Index = () => {
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 animate-fade-in" style={{animationDelay: '0.6s'}}>
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 animate-fade-in" style={{animationDelay: '0.6s'}}>
               <Button
                 variant="outline"
-                className="group px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full"
+                className="h-6 group px-2 py-0.5 sm:px-2.5 sm:py-0 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full"
                 onClick={handleWorldCupClick}
               >
-                <Trophy className="w-3 h-3 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300" />
+                <Trophy className="w-2 h-1 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300" />
                 <span className="hidden sm:inline">전시 월드컵</span>
                 <span className="sm:hidden">월드컵</span>
               </Button>
 
               <Button
                 variant="outline"
-                className="group px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full"
+                className="h-6 group px-2 py-0.5 sm:px-2.5 sm:py-0 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full"
                 onClick={handleStartExploring}
               >
-                <Eye className="w-3 h-3 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300" />
+                <Eye className="w-2 h-1 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300" />
                 갤러리
               </Button>
                           
               <Button
                 variant="outline"
-                className="group px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full relative"
+                className="h-6 group px-2 py-0.5 sm:px-2.5 sm:py-0 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full relative"
                 onClick={() => setShowSavedModal(true)}
               >
-                <Heart className={`w-3 h-3 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
+                <Heart className={`w-2 h-1 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
                 <span className="hidden sm:inline">저장된 메시지</span>
                 <span className="sm:hidden">저장</span>
                 {savedMessagesCount > 0 && (
