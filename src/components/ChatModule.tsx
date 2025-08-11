@@ -332,7 +332,7 @@ const handleSuggestionClick = async (suggestion: string) => {
                       </p>
                     )}
 
-                    {m.type === 'assistant' && (
+                    {m.type === 'assistant' && m.id !== 'welcome' && (
                       <div className="flex justify-center mt-2 pt-2 border-t border-border/20">
                         <Button
                           variant="ghost"
