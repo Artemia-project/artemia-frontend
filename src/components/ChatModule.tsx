@@ -102,12 +102,12 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
       id: 'welcome',
       type: 'assistant',
       content:
-        "안녕하세요! 저는 전시·예술 큐레이터 AI입니다. 궁금한 점을 질문해 보세요 😉",
+        "안녕하세요, 전시 큐레이터 아르테미아입니다! 당신을 위한 전시를 찾아드릴게요 ✨",
       timestamp: new Date(),
       suggestions: [
-        '이번 주말에 볼 만한 전시 추천해줘',
-        '요새 핫한 전시 추천해줘',
-        '서울 무료 전시 알려줘'
+        '이번 주말에 볼 만한 전시 하나 추천해줘',
+        '요즘 인기 있는 전시 세 개 추천해줘',
+        '서울에서 무료로 볼 수 있는 전시 알려줘'
       ]
     }
   ]);
@@ -162,7 +162,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
             content: data.final_answer,
             timestamp: new Date(),
             suggestions: [
-              '비슷한 다른 전시 추천해줘',
+              '비슷한 다른 전시 3개 추천해줘',
               '근처 맛집도 알려줘'
             ]
           };
@@ -406,7 +406,7 @@ const handleSuggestionClick = async (suggestion: string) => {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="궁금한 전시·예술 정보를 입력하세요"
+              placeholder="어떤 전시를 만나볼까요? 😊"
               className="flex-1 text-xs"
               disabled={isLoading}
             />
