@@ -130,11 +130,33 @@ const Index = () => {
 
   const handleCopyMessage = async (message: Message) => {
     try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard API not available');
+      }
       await navigator.clipboard.writeText(message.content);
       alert('메시지가 클립보드에 복사되었습니다! 📋');
     } catch (err) {
       console.error('Copy failed:', err);
-      alert('복사에 실패했습니다. 다시 시도해주세요.');
+      // Fallback: Create a temporary textarea element
+      const textArea = document.createElement('textarea');
+      textArea.value = message.content;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        alert('메시지가 클립보드에 복사되었습니다! 📋');
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr);
+        alert('복사에 실패했습니다. 브라우저가 클립보드 접근을 차단했을 수 있습니다.');
+      } finally {
+        document.body.removeChild(textArea);
+      }
     }
   };
 
@@ -176,11 +198,33 @@ const Index = () => {
       .join('\n\n');
     
     try {
+      // Check if clipboard API is available
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard API not available');
+      }
       await navigator.clipboard.writeText(allMessagesText);
       alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋`);
     } catch (err) {
       console.error('Copy failed:', err);
-      alert('복사에 실패했습니다. 다시 시도해주세요.');
+      // Fallback: Create a temporary textarea element
+      const textArea = document.createElement('textarea');
+      textArea.value = allMessagesText;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        document.execCommand('copy');
+        alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋`);
+      } catch (fallbackErr) {
+        console.error('Fallback copy failed:', fallbackErr);
+        alert('복사에 실패했습니다. 브라우저가 클립보드 접근을 차단했을 수 있습니다.');
+      } finally {
+        document.body.removeChild(textArea);
+      }
     }
   };
 
