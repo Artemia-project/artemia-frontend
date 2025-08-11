@@ -106,25 +106,55 @@ const Index = () => {
   const handleShareMessage = async (message: Message) => {
     const shareText = `Artemia AI 추천:\n\n${message.content}\n\n전시 추천 서비스 - Artemia: Art Curator AI`;
     
-    try {
-      if (navigator.share) {
+    // Try Web Share API first (mobile/PWA)
+    if (navigator.share) {
+      try {
         await navigator.share({
           title: 'Artemia AI 전시 추천',
           text: shareText
         });
-      } else {
-        await navigator.clipboard.writeText(shareText);
-        alert('메시지가 클립보드에 복사되었습니다! 📋');
+        return; // Success, no need to continue
+      } catch (shareErr) {
+        console.log('Web Share API failed, falling back to clipboard:', shareErr);
+        // Continue to clipboard fallback
       }
-    } catch (err) {
-      console.error('Share failed:', err);
-      // Fallback to clipboard
+    }
+    
+    // Fallback: try modern clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(shareText);
         alert('메시지가 클립보드에 복사되었습니다! 📋');
+        return;
       } catch (clipboardErr) {
-        console.error('Clipboard copy failed:', clipboardErr);
+        console.log('Clipboard API failed, using legacy method:', clipboardErr);
+        // Continue to legacy fallback
       }
+    }
+    
+    // Legacy fallback for insecure contexts
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        alert('메시지가 클립보드에 복사되었습니다! 📋');
+      } else {
+        throw new Error('execCommand failed');
+      }
+    } catch (legacyErr) {
+      console.error('All copy methods failed:', legacyErr);
+      // Show the text in a prompt as last resort
+      prompt('복사가 실패했습니다. 아래 텍스트를 수동으로 복사하세요:', shareText);
     }
   };
 
@@ -169,24 +199,55 @@ const Index = () => {
     
     const shareText = `✨ Artemia AI 저장된 전시 추천 ${savedMessages.length}개\n\n${allMessagesText}\n\n🎨 전시 추천 서비스 - Artemia: Art Curator AI`;
     
-    try {
-      if (navigator.share) {
+    // Try Web Share API first (mobile/PWA)
+    if (navigator.share) {
+      try {
         await navigator.share({
           title: `Artemia AI 저장된 메시지 ${savedMessages.length}개`,
           text: shareText
         });
-      } else {
-        await navigator.clipboard.writeText(shareText);
-        alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋✨`);
+        return; // Success, no need to continue
+      } catch (shareErr) {
+        console.log('Web Share API failed, falling back to clipboard:', shareErr);
+        // Continue to clipboard fallback
       }
-    } catch (err) {
-      console.error('Share failed:', err);
+    }
+    
+    // Fallback: try modern clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
       try {
         await navigator.clipboard.writeText(shareText);
         alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋✨`);
+        return;
       } catch (clipboardErr) {
-        console.error('Clipboard copy failed:', clipboardErr);
+        console.log('Clipboard API failed, using legacy method:', clipboardErr);
+        // Continue to legacy fallback
       }
+    }
+    
+    // Legacy fallback for insecure contexts
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = shareText;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+      
+      if (successful) {
+        alert(`${savedMessages.length}개의 메시지가 클립보드에 복사되었습니다! 📋✨`);
+      } else {
+        throw new Error('execCommand failed');
+      }
+    } catch (legacyErr) {
+      console.error('All copy methods failed:', legacyErr);
+      // Show the text in a prompt as last resort
+      prompt('복사가 실패했습니다. 아래 텍스트를 수동으로 복사하세요:', shareText);
     }
   };
 
