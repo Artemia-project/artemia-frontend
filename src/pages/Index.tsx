@@ -18,6 +18,8 @@ import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy, Share2, ChevronDow
 import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import heroArtwork from '@/assets/hero-artwork.jpg';
+import artemiaLogo from '@/assets/Artemia_logo.gif';
+
 
 interface Artwork {
   id: string;
@@ -209,53 +211,74 @@ const Index = () => {
           <img
             src={heroArtwork}
             alt="Hero artwork"
-            className="w-full h-full object-cover opacity-20"
+            className="w-full h-full object-cover opacity-15"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-primary/60" />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/70 to-primary/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent" />
         </div>
         
-        <div className="relative container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-12">
-          <div className="max-w-3xl mx-auto text-center text-primary-foreground">
+        {/* Subtle decorative elements */}
+        <div className="absolute top-10 left-10 w-24 h-24 border border-primary-foreground/10 rounded-full blur-sm opacity-30"></div>
+        <div className="absolute bottom-20 right-20 w-32 h-32 border border-primary-foreground/10 rounded-full blur-sm opacity-20"></div>
+        <div className="absolute top-1/2 right-10 w-16 h-16 border border-primary-foreground/10 rounded-full blur-sm opacity-25"></div>
+        
+        <div className="relative container mx-auto px-3 sm:px-4 lg:px-6 py-3 sm:py-4">
+          <div className="max-w-4xl mx-auto text-center text-primary-foreground">
             
-            <div className="flex items-center justify-center gap-1 sm:gap-2 mb-2 sm:mb-4">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-primary-foreground" />
-              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light leading-tight">
-                Artemia: Art Curator AI
-              </h1>
+            {/* Main Title */}
+            <div className="mb-2 sm:mb-3 animate-fade-in">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extralight tracking-[0.15em]" 
+                    style={{fontFamily: '"Poppins", "Playfair Display", serif'}}>
+                  <span className="bg-gradient-to-r from-primary-foreground via-primary-foreground/95 to-primary-foreground bg-clip-text text-transparent drop-shadow-sm">
+                    Artemia
+                  </span>
+                </h1>
+              </div>
+              
+              {/* Elegant subtitle */}
+              <div className="space-y-1 sm:space-y-2 animate-fade-in" style={{animationDelay: '0.3s'}}>
+                <p className="text-xs sm:text-sm font-thin opacity-80 max-w-2xl mx-auto leading-relaxed">
+                  인공지능이 큐레이션하는 맞춤형 전시 추천 서비스
+                </p>
+                <div className="w-12 sm:w-16 h-px bg-gradient-to-r from-transparent via-primary-foreground/40 to-transparent mx-auto animate-pulse"></div>
+              </div>
             </div>
-            
 
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4">
+            {/* Action buttons */}
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 animate-fade-in" style={{animationDelay: '0.6s'}}>
               <Button
                 variant="outline"
-                size="sm"
-                className="px-2 py-1 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-xs sm:text-sm lg:text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                className="h-6 group px-2 py-0.5 sm:px-2.5 sm:py-0 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full"
                 onClick={handleWorldCupClick}
               >
-                <Trophy className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">내 전시 월드컵</span>
+                <Trophy className="w-2 h-1 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300" />
+                <span className="hidden sm:inline">전시 월드컵</span>
                 <span className="sm:hidden">월드컵</span>
               </Button>
 
               <Button
                 variant="outline"
-                size="sm"
-                className="px-2 py-1 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-xs sm:text-sm lg:text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                className="h-6 group px-2 py-0.5 sm:px-2.5 sm:py-0 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full"
                 onClick={handleStartExploring}
               >
-                <Eye className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2" />
-                둘러보기
+                <Eye className="w-2 h-1 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300" />
+                갤러리
               </Button>
                           
               <Button
                 variant="outline"
-                size="sm"
-                className="px-2 py-1 sm:px-3 sm:py-2 lg:px-4 lg:py-2 text-xs sm:text-sm lg:text-base flex items-center bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/20 transition-all duration-200"
+                className="h-6 group px-2 py-0.5 sm:px-2.5 sm:py-0 text-xs font-light tracking-wide flex items-center bg-primary-foreground/5 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/15 hover:border-primary-foreground/50 transition-all duration-300 backdrop-blur-sm rounded-full relative"
                 onClick={() => setShowSavedModal(true)}
               >
-                <Heart className={`w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1 sm:mr-2 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
-                <span className="hidden sm:inline">{savedMessagesCount} 저장된 메세지</span>
-                <span className="sm:hidden">{savedMessagesCount} 저장</span>
+                <Heart className={`w-2 h-1 mr-1 sm:mr-1.5 group-hover:scale-110 transition-transform duration-300 ${savedMessagesCount > 0 ? 'fill-current' : ''}`} />
+                <span className="hidden sm:inline">저장된 메시지</span>
+                <span className="sm:hidden">저장</span>
+                {savedMessagesCount > 0 && (
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                    {savedMessagesCount}
+                  </span>
+                )}
               </Button>
             </div>
           </div>
@@ -308,10 +331,7 @@ const Index = () => {
             {/* Header with title and close button */}
             <div className="flex items-center justify-between p-4 md:p-6 border-b">
               <div className="text-center flex-1">
-                <h2 className="text-xl md:text-2xl font-medium">저장된 메시지</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  즐겨찾기로 저장한 메시지들을 확인하고 공유할 수 있습니다.
-                </p>
+                <h2 className="text-xl md:text-2xl font-medium text-left">저장된 메시지</h2>
               </div>
               <button
                 onClick={() => setShowSavedModal(false)}

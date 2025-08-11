@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/dialog';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 
+
 /* ---- 타입 --------------------------------------------------------- */
 export interface Message {
   id: string;
@@ -101,7 +102,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
       id: 'welcome',
       type: 'assistant',
       content:
-        "안녕하세요! 저는 전시·예술 큐레이터 AI예요. 궁금한 점을 질문해 보세요 😉",
+        "안녕하세요! 저는 전시·예술 큐레이터 AI입니다. 궁금한 점을 질문해 보세요 😉",
       timestamp: new Date(),
       suggestions: [
         '이번 주말에 볼 만한 전시 추천해줘',
@@ -220,7 +221,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
         content: data.final_answer,
         timestamp: new Date(),
         suggestions: [
-          '비슷한 코스 더 추천해줘',
           '근처 무료 전시 알려줘',
         ],
       };
@@ -294,11 +294,11 @@ const handleSuggestionClick = async (suggestion: string) => {
   return (
     <>
       {/* === 메인 카드 =================================== */}
-      <Card className="h-full flex flex-col shadow-none bg-gradient-to-br from-card via-card to-accent/5 border-0 rounded-none">
+      <Card className="h-full flex flex-col shadow-none bg-gradient-to-br from-card via-card to-accent/5 border-0 rounded-none lg:mx-4 lg:my-2 lg:rounded-lg lg:border lg:shadow-sm">
 
         {/* Messages */}
         <ScrollArea className="flex-1 p-2 sm:p-3 lg:p-4" ref={scrollAreaRef}>
-          <div className="space-y-2 sm:space-y-3 lg:space-y-4">
+          <div className="space-y-2 sm:space-y-3 lg:space-y-4 max-w-3xl mx-auto">
             {messages.map((m) => (
               <div
                 key={m.id}
@@ -307,12 +307,12 @@ const handleSuggestionClick = async (suggestion: string) => {
                 }`}
               >
                 {m.type === 'assistant' && (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot className="w-3 h-3 sm:w-4 sm:h-4 text-accent-foreground" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1 border-2 border-primary/20">
+                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                   </div>
                 )}
 
-                <div className="max-w-[80%]">
+                <div className="max-w-[80%] lg:max-w-[70%] xl:max-w-[60%]">
                   {/* bubble */}
                   <div
                     className={`p-2 sm:p-3 lg:p-4 rounded-xl relative ${
@@ -324,31 +324,34 @@ const handleSuggestionClick = async (suggestion: string) => {
                     {m.type === 'assistant' ? (
                       <MarkdownRenderer
                         content={m.content}
-                        className="text-sm leading-relaxed"
+                        className="text-xs leading-relaxed"
                       />
                     ) : (
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      <p className="text-xs leading-relaxed whitespace-pre-wrap">
                         {m.content}
                       </p>
                     )}
 
                     {m.type === 'assistant' && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleSaveMessage(m.id)}
-                        className={`absolute bottom-2 right-2 h-8 w-8 ${
-                          m.isSaved
-                            ? 'text-red-500 bg-red-50/50'
-                            : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
-                        }`}
-                      >
-                        <Heart
-                          className={`w-4 h-4 ${
-                            m.isSaved ? 'fill-current' : ''
+                      <div className="flex justify-center mt-2 pt-2 border-t border-border/20">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSaveMessage(m.id)}
+                          className={`h-6 px-2 text-xs ${
+                            m.isSaved
+                              ? 'text-red-500 bg-red-50/50'
+                              : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
                           }`}
-                        />
-                      </Button>
+                        >
+                          <Heart
+                            className={`w-3 h-3 mr-1 ${
+                              m.isSaved ? 'fill-current' : ''
+                            }`}
+                          />
+                          {m.isSaved ? '저장됨' : '저장'}
+                        </Button>
+                      </div>
                     )}
                   </div>
 
@@ -361,7 +364,7 @@ const handleSuggestionClick = async (suggestion: string) => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleSuggestionClick(s)}
-                          className="text-xs h-6 sm:h-7 px-1 sm:px-2"
+                          className="text-xs h-5 sm:h-6 px-1 sm:px-2"
                         >
                           {s}
                         </Button>
@@ -375,8 +378,8 @@ const handleSuggestionClick = async (suggestion: string) => {
             {/* 로딩 애니메이션 */}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-accent-foreground" />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 border-2 border-primary/20">
+                  <Bot className="w-5 h-5 text-primary" />
                 </div>
                 <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
                   <div className="flex space-x-1">
@@ -398,13 +401,13 @@ const handleSuggestionClick = async (suggestion: string) => {
 
         {/* Input */}
         <div className="p-2 sm:p-3 lg:p-4 border-t border-border bg-gradient-to-r from-background to-accent/5">
-          <div className="flex gap-1 sm:gap-2">
+          <div className="flex gap-1 sm:gap-2 max-w-3xl mx-auto">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="궁금한 전시·예술 정보를 입력하세요"
-              className="flex-1"
+              className="flex-1 text-xs"
               disabled={isLoading}
             />
             <Button
