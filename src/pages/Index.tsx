@@ -18,6 +18,7 @@ import { Sparkles, Frame, Eye, Heart, ArrowLeftRight, Trophy, Share2, ChevronDow
 import { exhibitionsData, type Exhibition } from '@/data/exhibitions';
 import { MarkdownRenderer } from '@/components/MarkdownRenderer';
 import heroArtwork from '@/assets/hero-artwork.jpg';
+import artemiaLogo from '@/assets/Artemia_logo.gif';
 
 interface Artwork {
   id: string;
@@ -225,7 +226,7 @@ const Index = () => {
             
             {/* Main Title */}
             <div className="mb-4 sm:mb-6 animate-fade-in">
-              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-thin tracking-[0.1em]" 
                     style={{fontFamily: '"Poppins", "Inter", system-ui, sans-serif'}}>
                   <span className="bg-gradient-to-r from-primary-foreground via-primary-foreground/95 to-primary-foreground bg-clip-text text-transparent drop-shadow-sm">

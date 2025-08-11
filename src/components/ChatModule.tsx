@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, Sparkles, Bot, Heart } from 'lucide-react';
+import artemiaLogo from '@/assets/Artemia_logo.gif';
 import { toast } from '@/components/ui/use-toast';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -307,8 +308,12 @@ const handleSuggestionClick = async (suggestion: string) => {
                 }`}
               >
                 {m.type === 'assistant' && (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Bot className="w-3 h-3 sm:w-4 sm:h-4 text-accent-foreground" />
+                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center flex-shrink-0 mt-1 border border-accent/20">
+                    <img 
+                      src={artemiaLogo} 
+                      alt="Artemia" 
+                      className="w-4 h-4 sm:w-5 sm:h-5 object-contain rounded-full"
+                    />
                   </div>
                 )}
 
@@ -375,8 +380,12 @@ const handleSuggestionClick = async (suggestion: string) => {
             {/* 로딩 애니메이션 */}
             {isLoading && (
               <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
-                  <Bot className="w-4 h-4 text-accent-foreground" />
+                <div className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-accent/20">
+                  <img 
+                    src={artemiaLogo} 
+                    alt="Artemia" 
+                    className="w-5 h-5 object-contain rounded-full"
+                  />
                 </div>
                 <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
                   <div className="flex space-x-1">
