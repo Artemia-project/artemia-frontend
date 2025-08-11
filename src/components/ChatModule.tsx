@@ -104,8 +104,8 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
         "안녕하세요! 저는 전시·예술 큐레이터 AI예요. 궁금한 점을 질문해 보세요 😉",
       timestamp: new Date(),
       suggestions: [
-        '이번 주말 볼 만한 전시 추천해줘',
-        '전통 미술과 현대 미술 차이 알려줘',
+        '이번 주말에 볼 만한 전시 추천해줘',
+        '요새 핫한 전시 추천해줘',
         '서울 무료 전시 알려줘'
       ]
     }
@@ -161,8 +161,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
             content: data.final_answer,
             timestamp: new Date(),
             suggestions: [
-              '상세한 코스 일정 짜줘',
-              '교통편 정보도 알려줘',
               '비슷한 다른 전시 추천해줘',
               '근처 맛집도 알려줘'
             ]
@@ -222,10 +220,8 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
         content: data.final_answer,
         timestamp: new Date(),
         suggestions: [
-          '비슷한 코스 더 추천',
-          '아이 동선만 짧게 요약해줘',
+          '비슷한 코스 더 추천해줘',
           '근처 무료 전시 알려줘',
-          '지도 링크도 같이 줘',
         ],
       };
       setMessages(prev => [...prev, assistantMessage]);
