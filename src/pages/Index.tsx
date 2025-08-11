@@ -107,7 +107,7 @@ const Index = () => {
     const shareText = `Artemia AI 추천:\n\n${message.content}\n\n전시 추천 서비스 - Artemia: Art Curator AI`;
     
     try {
-      if (navigator.share && navigator.canShare({ text: shareText })) {
+      if (navigator.share) {
         await navigator.share({
           title: 'Artemia AI 전시 추천',
           text: shareText
@@ -170,7 +170,7 @@ const Index = () => {
     const shareText = `✨ Artemia AI 저장된 전시 추천 ${savedMessages.length}개\n\n${allMessagesText}\n\n🎨 전시 추천 서비스 - Artemia: Art Curator AI`;
     
     try {
-      if (navigator.share && navigator.canShare({ text: shareText })) {
+      if (navigator.share) {
         await navigator.share({
           title: `Artemia AI 저장된 메시지 ${savedMessages.length}개`,
           text: shareText
