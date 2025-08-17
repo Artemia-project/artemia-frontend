@@ -4,33 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getRoundName } from "@/lib/roundNames";
 import { useToast } from "@/components/ui/use-toast";
 import { Eye, Frame } from "lucide-react";
-
-interface Exhibition {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  location: string;
-  theme?: string | null;
-  cost: string;
-  start: string;
-  end: string;
-  link: string;
-}
-
-interface Match {
-  id: string;
-  exhibition1: Exhibition;
-  exhibition2: Exhibition;
-  winner: Exhibition | null;
-  round: number;
-}
-
-interface ExhibitionWorldCupProps {
-  exhibitions: Exhibition[];
-  onClose: () => void;
-  onSendMessage?: (msg: string) => void;
-}
+import { UI_CONSTANTS } from "@/constants";
+import { Exhibition, Match, ExhibitionWorldCupProps } from "@/types";
 
 export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   exhibitions,
@@ -50,7 +25,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   /** Initialize tournament when exhibitions change */
   useEffect(() => {
     console.log('🎯 useEffect triggered, exhibitions:', exhibitions?.length);
-    if (!exhibitions || exhibitions.length < 2) {
+    if (!exhibitions || exhibitions.length < UI_CONSTANTS.MIN_EXHIBITIONS_FOR_TOURNAMENT) {
       console.log('❌ Not enough exhibitions, resetting');
       resetTournament([]);
       return;
@@ -60,7 +35,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
   }, [exhibitions]);
 
   const startTournament = (list: Exhibition[]) => {
-    const size = Math.min(16, list.length);
+    const size = Math.min(UI_CONSTANTS.TOURNAMENT_SIZE, list.length);
     const matches: Match[] = [];
     console.log('🏗️ Creating tournament with size:', size);
     for (let i = 0; i < size; i += 2) {
@@ -89,7 +64,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
     setIsComplete(false);
     setChampion(null);
     setChampionImageError(false);
-    if (list.length >= 2) startTournament(list);
+    if (list.length >= UI_CONSTANTS.MIN_EXHIBITIONS_FOR_TOURNAMENT) startTournament(list);
   };
 
   // Memoize current match to prevent infinite re-renders
@@ -167,7 +142,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
           setAllMatches(prev => [...prev, ...nextRoundMatches]);
           setCurrentRound(nextRound);
           setCurrentMatchIndex(0);
-        }, 800);
+        }, UI_CONSTANTS.ROUND_TRANSITION_DELAY);
       } else {
         // Next match in same round
         setCurrentMatchIndex(prev => prev + 1);

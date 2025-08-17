@@ -3,121 +3,37 @@
    백엔드 FastAPI(/ask)와 통신해 `final_answer`를 채팅창에 표시하는
    완성형 컴포넌트.  (C) Artemia
 */
-import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import React, { useRef, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Send, Sparkles, Bot, Heart } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
-import { Badge } from '@/components/ui/badge';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { MarkdownRenderer } from '@/components/MarkdownRenderer';
+import { ChatMessage } from './ChatModule/ChatMessage';
+import { ChatInput } from './ChatModule/ChatInput';
+import { LoadingIndicator } from './ChatModule/LoadingIndicator';
+import { useChat } from '@/hooks/useChat';
+import { UI_CONSTANTS } from '@/constants';
+import { ChatModuleProps } from '@/types';
 
+// Re-export Message type for backward compatibility
+export { Message } from '@/types';
 
-/* ---- 타입 --------------------------------------------------------- */
-export interface Message {
-  id: string;
-  type: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  suggestions?: string[];
-  isSaved?: boolean;
-}
-
-interface ChatModuleProps {
-  onArtworkRecommendation?: (artwork: unknown) => void;
-  externalMessage?: string;
-  onMessageSent?: () => void;
-  onSavedMessagesChange?: (count: number, messages: Message[]) => void;
-}
-
-/* ---- 환경변수: API End-Point -------------------------------------- */
-// 별도의 API URL이 주어지지 않을 경우 localhost의 8000번 포트를 호출합니다.
-// const API_BASE =
-//   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
-const FALLBACK_API = `${window.location.protocol}//${window.location.hostname}:8000`;
-const API_BASE = (import.meta.env.VITE_API_BASE_URL || FALLBACK_API).replace(/\/+$/, '');
-
-/* ---- 유틸: 백엔드 호출 ------------------------------------------- */
-type BackendResponse = { final_answer: string; cards: unknown[] };
-
-const MAX_TURNS = 8; // 과도한 페이로드 방지
-
-async function callBackend(history: Message[]): Promise<BackendResponse> {
-  // 프론트의 Message[] → 백엔드가 기대하는 {messages:[{role,content}], meta:{…}}
-  const payload = {
-    messages: history.slice(-MAX_TURNS).map(m => ({
-      role: m.type === 'user' ? 'user' : 'assistant',
-      content: m.content,
-    })),
-    meta: {
-      client: 'artful-muse-chat',
-      ts: new Date().toISOString(),
-    },
-  };
-
-  const res = await fetch(`${API_BASE}/chat`, {
-    method: 'POST',
-    mode: 'cors',
-    headers: { 
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const text = await res.text();
-  if (!res.ok) {
-    // FastAPI의 오류 메시지(detail)를 최대한 보여주자
-    try {
-      const j = JSON.parse(text);
-      throw new Error(`Backend error ${res.status}: ${j.detail ?? text}`);
-    } catch {
-      throw new Error(`Backend error ${res.status}: ${text}`);
-    }
-  }
-  return JSON.parse(text) as BackendResponse;
-}
-
-/* =================================================================== */
-/*                        ChatModule 컴포넌트                           */
-/* =================================================================== */
 export const ChatModule: React.FC<ChatModuleProps> = ({
   onArtworkRecommendation,
   externalMessage,
   onMessageSent,
   onSavedMessagesChange
 }) => {
-  /* ---------------- state --------------------------------------- */
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 'welcome',
-      type: 'assistant',
-      content:
-        "안녕하세요, 전시 큐레이터 아르테미아입니다! 당신을 위한 전시를 찾아드릴게요 ✨",
-      timestamp: new Date(),
-      suggestions: [
-        '이번 주말에 볼 만한 전시 하나 추천해줘',
-        '요즘 인기 있는 전시 세 개 추천해줘',
-        '서울에서 무료로 볼 수 있는 전시 알려줘'
-      ]
-    }
-  ]);
+  const {
+    messages,
+    isLoading,
+    sendMessage,
+    sendExternalMessage,
+    toggleSaveMessage,
+    savedMessages,
+  } = useChat();
 
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSavedModalOpen, setIsSavedModalOpen] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  /* ---------------- auto-scroll --------------------------------- */
+  // Auto-scroll to bottom when messages change
   useEffect(() => {
     const scrollToBottom = () => {
       if (scrollAreaRef.current) {
@@ -128,345 +44,61 @@ export const ChatModule: React.FC<ChatModuleProps> = ({
       }
     };
 
-    // Small delay to ensure DOM is updated
-    const timeoutId = setTimeout(scrollToBottom, 100);
-    
+    const timeoutId = setTimeout(scrollToBottom, UI_CONSTANTS.SCROLL_TIMEOUT);
     return () => clearTimeout(timeoutId);
   }, [messages]);
 
-  /* ---------------- external message handling ------------------- */
-  // in ChatModule.tsx (replace the previous useEffect for externalMessage)
+  // Handle external messages
   useEffect(() => {
     if (!externalMessage) return;
-
-    // Do everything against the latest state using functional updates
-    setIsLoading(true);
-
-    setMessages(prevMessages => {
-      const userMessage: Message = {
-        id: Date.now().toString(),
-        type: 'user',
-        content: externalMessage,
-        timestamp: new Date()
-      };
-
-      const nextHistory = [...prevMessages, userMessage];
-
-      // fire-and-forget async call, will append assistant message when done
-      (async () => {
-        try {
-          const data = await callBackend(nextHistory);
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            type: 'assistant',
-            content: data.final_answer,
-            timestamp: new Date(),
-            suggestions: [
-              '비슷한 다른 전시 3개 추천해줘',
-              '근처 맛집도 알려줘'
-            ]
-          };
-          setMessages(prev => [...prev, assistantMessage]);
-        } catch (err: unknown) {
-          toast({
-            title: '백엔드 오류',
-            description: err instanceof Error ? err.message : '요청 중 오류가 발생했어요.',
-            variant: 'destructive',
-          });
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-
-      // return the messages with the user message appended synchronously
-      return nextHistory;
-    });
-
-    if (onMessageSent) onMessageSent();
-    // IMPORTANT: do not include `messages` in deps to avoid effect loop
-  }, [externalMessage, onMessageSent]);
+    
+    sendExternalMessage(externalMessage);
+    onMessageSent?.();
+  }, [externalMessage, onMessageSent, sendExternalMessage]);
 
 
-  /* ---------------- 파생 ------------------------------ */
-  const savedMessages = messages.filter((msg) => msg.isSaved);
-  const savedCount = savedMessages.length;
-
+  // Notify parent about saved messages changes
   useEffect(() => {
-    if (onSavedMessagesChange) {
-      onSavedMessagesChange(savedCount, savedMessages);
-    }
-  }, [savedCount, savedMessages, onSavedMessagesChange]);
+    onSavedMessagesChange?.(savedMessages.length, savedMessages);
+  }, [savedMessages, onSavedMessagesChange]);
 
-  /* ---------------- handlers --------------------------- */
+  const [inputValue, setInputValue] = React.useState('');
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date(),
-    };
-
-    const nextHistory = [...messages, userMessage];
-    setMessages(nextHistory);
+    if (!inputValue.trim()) return;
+    await sendMessage(inputValue);
     setInputValue('');
-    setIsLoading(true);
-
-    try {
-      const data = await callBackend(nextHistory);
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'assistant',
-        content: data.final_answer,
-        timestamp: new Date(),
-        suggestions: [
-          '근처 무료 전시 알려줘',
-        ],
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-    } catch (err: any) {
-      toast({
-        title: '백엔드 오류',
-        description: err instanceof Error ? err.message : '요청 중 오류가 발생했어요.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-const handleSuggestionClick = async (suggestion: string) => {
-  if (isLoading) return;
-
-  const userMessage: Message = {
-    id: Date.now().toString(),
-    type: 'user',
-    content: suggestion,
-    timestamp: new Date(),
+  const handleSuggestionClick = async (suggestion: string) => {
+    await sendMessage(suggestion);
   };
 
-  const nextHistory = [...messages, userMessage];
-  setMessages(nextHistory);
-  setIsLoading(true);
-
-  try {
-    const data = await callBackend(nextHistory);
-    const assistantMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      type: 'assistant',
-      content: data.final_answer,
-      timestamp: new Date(),
-    };
-    setMessages(prev => [...prev, assistantMessage]);
-  } catch (err: any) {
-    toast({
-      title: '백엔드 오류',
-      description: err instanceof Error ? err.message : '요청 중 오류가 발생했어요.',
-      variant: 'destructive',
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-  const handleSaveMessage = (id: string) => {
-    setMessages((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, isSaved: !m.isSaved } : m))
-    );
-    const msg = messages.find((m) => m.id === id);
-    toast({
-      title: msg?.isSaved ? '저장 해제' : '즐겨찾기',
-      description: msg?.isSaved
-        ? '메시지가 즐겨찾기에서 제거되었습니다.'
-        : '메시지를 즐겨찾기에 추가했어요.'
-    });
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  /* ---------------- Render ----------------------------- */
   return (
-    <>
-      {/* === 메인 카드 =================================== */}
-      <Card className="h-full flex flex-col shadow-none bg-gradient-to-br from-card via-card to-accent/5 border-0 rounded-none lg:mx-4 lg:my-2 lg:rounded-lg lg:border lg:shadow-sm">
-
-        {/* Messages */}
-        <ScrollArea className="flex-1 p-2 sm:p-3 lg:p-4" ref={scrollAreaRef}>
-          <div className="space-y-2 sm:space-y-3 lg:space-y-4 max-w-3xl mx-auto">
-            {messages.map((m) => (
-              <div
-                key={m.id}
-                className={`flex gap-2 sm:gap-3 ${
-                  m.type === 'user' ? 'justify-end' : 'justify-start'
-                }`}
-              >
-                {m.type === 'assistant' && (
-                  <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1 border-2 border-primary/20">
-                    <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-                  </div>
-                )}
-
-                <div className="max-w-[80%] lg:max-w-[70%] xl:max-w-[60%]">
-                  {/* bubble */}
-                  <div
-                    className={`p-2 sm:p-3 lg:p-4 rounded-xl relative ${
-                      m.type === 'user'
-                        ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-elegant'
-                        : 'bg-gradient-to-r from-card to-accent/5 border border-border shadow-gallery'
-                    }`}
-                  >
-                    {m.type === 'assistant' ? (
-                      <MarkdownRenderer
-                        content={m.content}
-                        className="text-xs leading-relaxed"
-                      />
-                    ) : (
-                      <p className="text-xs leading-relaxed whitespace-pre-wrap">
-                        {m.content}
-                      </p>
-                    )}
-
-                    {m.type === 'assistant' && m.id !== 'welcome' && (
-                      <div className="flex justify-center mt-2 pt-2 border-t border-border/20">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSaveMessage(m.id)}
-                          className={`h-6 px-2 text-xs ${
-                            m.isSaved
-                              ? 'text-red-500 bg-red-50/50'
-                              : 'text-muted-foreground hover:text-red-500 hover:bg-red-50/30'
-                          }`}
-                        >
-                          <Heart
-                            className={`w-3 h-3 mr-1 ${
-                              m.isSaved ? 'fill-current' : ''
-                            }`}
-                          />
-                          {m.isSaved ? '저장됨' : '저장'}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* (선택) suggestions */}
-                  {m.suggestions && (
-                    <div className="mt-1 sm:mt-2 flex flex-wrap gap-1">
-                      {m.suggestions.map((s, i) => (
-                        <Button
-                          key={i}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSuggestionClick(s)}
-                          className="text-xs h-5 sm:h-6 px-1 sm:px-2"
-                        >
-                          {s}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {/* 로딩 애니메이션 */}
-            {isLoading && (
-              <div className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 border-2 border-primary/20">
-                  <Bot className="w-5 h-5 text-primary" />
-                </div>
-                <div className="bg-card border border-border p-3 rounded-lg shadow-sm">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce" />
-                    <div
-                      className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                      style={{ animationDelay: '0.1s' }}
-                    />
-                    <div
-                      className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"
-                      style={{ animationDelay: '0.2s' }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </ScrollArea>
-
-        {/* Input */}
-        <div className="p-2 sm:p-3 lg:p-4 border-t border-border bg-gradient-to-r from-background to-accent/5">
-          <div className="flex gap-1 sm:gap-2 max-w-3xl mx-auto">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="어떤 전시를 만나볼까요? 😊"
-              className="flex-1 text-xs"
-              disabled={isLoading}
+    <Card className="h-full flex flex-col shadow-none bg-gradient-to-br from-card via-card to-accent/5 border-0 rounded-none lg:mx-4 lg:my-2 lg:rounded-lg lg:border lg:shadow-sm">
+      {/* Messages */}
+      <ScrollArea className="flex-1 p-2 sm:p-3 lg:p-4" ref={scrollAreaRef}>
+        <div className="space-y-2 sm:space-y-3 lg:space-y-4 max-w-3xl mx-auto">
+          {messages.map((message) => (
+            <ChatMessage
+              key={message.id}
+              message={message}
+              onSave={toggleSaveMessage}
+              onSuggestionClick={handleSuggestionClick}
             />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isLoading}
-              variant="curator"
-              size="icon"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
-          </div>
+          ))}
+
+          {isLoading && <LoadingIndicator />}
         </div>
-      </Card>
+      </ScrollArea>
 
-      {/* Saved Modal */}
-      <Dialog open={isSavedModalOpen} onOpenChange={setIsSavedModalOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Saved Messages</DialogTitle>
-            <DialogDescription>
-              즐겨찾기한 메시지 목록입니다.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-3 max-h-[300px] overflow-y-auto">
-            {savedMessages.length > 0 ? (
-              savedMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className="p-3 border rounded-lg bg-accent/5 text-sm relative"
-                >
-                  <MarkdownRenderer
-                    content={msg.content}
-                    className="text-sm pr-8"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 text-red-500"
-                    onClick={() => handleSaveMessage(msg.id)}
-                  >
-                    <Heart className="w-4 h-4 fill-current" />
-                  </Button>
-                </div>
-              ))
-            ) : (
-              <p className="text-muted-foreground text-sm">
-                저장된 메시지가 없습니다.
-              </p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="secondary" onClick={() => setIsSavedModalOpen(false)}>
-              닫기
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </>
+      {/* Input */}
+      <ChatInput
+        value={inputValue}
+        onChange={setInputValue}
+        onSend={handleSendMessage}
+        isLoading={isLoading}
+      />
+    </Card>
   );
 };

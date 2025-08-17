@@ -4,24 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { X, ArrowLeftRight, Palette, Calendar, Ruler } from 'lucide-react';
-
-interface Artwork {
-  id: string;
-  title: string;
-  artist: string;
-  year: string;
-  medium: string;
-  dimensions: string;
-  description: string;
-  image: string;
-  tags: string[];
-  price?: string;
-}
-
-interface ComparisonViewProps {
-  artworks: Artwork[];
-  onClose: () => void;
-}
+import { Artwork, ComparisonViewProps } from '@/types';
 
 export const ComparisonView: React.FC<ComparisonViewProps> = ({ artworks, onClose }) => {
   if (artworks.length !== 2) return null;

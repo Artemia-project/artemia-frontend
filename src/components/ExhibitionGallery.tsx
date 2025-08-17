@@ -2,24 +2,7 @@ import React, { useState, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Eye, MapPin, X } from "lucide-react";
-
-interface Exhibition {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  location: string;
-  theme?: string;
-  cost: string;
-  start: string;
-  end: string;
-  link: string;
-}
-
-interface ExhibitionGalleryProps {
-  exhibitions: Exhibition[];
-  onClose: () => void;
-}
+import { Exhibition, ExhibitionGalleryProps } from "@/types";
 
 const ExhibitionCard = React.memo(function ExhibitionCard({
   exhibition,
