@@ -16,8 +16,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onSavedMessagesClick,
   savedMessagesCount
 }) => {
-  console.log('🎨 HeroSection rendering with savedMessagesCount:', savedMessagesCount);
-  
   return (
     <section className="flex-shrink-0 relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80">
       <div className="absolute inset-0">
