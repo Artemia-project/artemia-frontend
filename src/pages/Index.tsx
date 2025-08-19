@@ -81,14 +81,13 @@ const Index = () => {
 
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden">
       <HeroSection
         onWorldCupClick={handleWorldCupClick}
         onGalleryClick={handleStartExploring}
         onSavedMessagesClick={() => setShowSavedModal(true)}
         savedMessagesCount={savedMessagesCount}
       />
-
 
       {/* Main Content - Chat fills all remaining space */}
       <section className="flex-1 min-h-0">

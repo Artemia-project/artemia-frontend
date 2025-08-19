@@ -11,10 +11,7 @@ import { ChatInput } from './ChatModule/ChatInput';
 import { LoadingIndicator } from './ChatModule/LoadingIndicator';
 import { useChat } from '@/hooks/useChat';
 import { UI_CONSTANTS } from '@/constants';
-import { ChatModuleProps } from '@/types';
-
-// Re-export Message type for backward compatibility
-export { Message } from '@/types';
+import { ChatModuleProps, Message } from '@/types';
 
 export const ChatModule: React.FC<ChatModuleProps> = ({
   onArtworkRecommendation,
