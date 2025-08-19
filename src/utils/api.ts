@@ -1,13 +1,5 @@
 import { API_CONFIG } from '@/constants';
-
-export interface Message {
-  id: string;
-  type: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  suggestions?: string[];
-  isSaved?: boolean;
-}
+import { Message } from '@/types';
 
 export interface BackendResponse {
   final_answer: string;

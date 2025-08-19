@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { ChatModule } from '@/components/ChatModule';
 import { ComparisonView } from '@/components/ComparisonView';
 import { ExhibitionWorldCup } from '@/components/ExhibitionWorldCup';
@@ -26,7 +26,7 @@ const Index = () => {
   // Memoize the sliced exhibitions to prevent infinite re-renders
   const worldCupExhibitions = useMemo(() => exhibitions.slice(0, UI_CONSTANTS.TOURNAMENT_SIZE), [exhibitions]);
 
-  function handleSaveArtwork(artwork: Artwork) {
+  const handleSaveArtwork = useCallback((artwork: Artwork) => {
     setSavedArtworks(prev => {
       const exists = prev.find(item => item.id === artwork.id);
       if (exists) {
@@ -34,9 +34,9 @@ const Index = () => {
       }
       return [...prev, artwork];
     });
-  }
+  }, []);
 
-  const handleCompareArtwork = (artwork: Artwork) => {
+  const handleCompareArtwork = useCallback((artwork: Artwork) => {
     setComparisonArtworks(prev => {
       const exists = prev.find(item => item.id === artwork.id);
       if (exists) {
@@ -51,44 +51,47 @@ const Index = () => {
       }
       return newComparison;
     });
-  };
+  }, []);
 
-  const handleWorldCupClick = () => {
+  const handleWorldCupClick = useCallback(() => {
     if (exhibitions.length >= UI_CONSTANTS.TOURNAMENT_SIZE) {
       setShowWorldCup(true);
     } else {
       alert(`⚠️ Need ${UI_CONSTANTS.TOURNAMENT_SIZE} exhibitions for tournament. Currently have: ${exhibitions.length}`);
     }
-  };
+  }, [exhibitions.length]);
 
-  const handleStartExploring = () => {
+  const handleStartExploring = useCallback(() => {
     setShowExhibitionGallery(true);
-  };
+  }, []);
 
-  const handleSendMessageToChat = (message: string) => {
+  const handleSendMessageToChat = useCallback((message: string) => {
     setExternalChatMessage(message);
-  };
+  }, []);
 
-  const handleChatMessageSent = () => {
+  const handleChatMessageSent = useCallback(() => {
     setExternalChatMessage('');
-  };
+  }, []);
 
-  const handleSavedMessagesChange = (count: number, messages: Message[]) => {
+  const handleSavedMessagesChange = useCallback((count: number, messages: Message[]) => {
     setSavedMessagesCount(count);
     setSavedMessages(messages);
-  };
+  }, []);
+
+  const handleSavedMessagesClick = useCallback(() => {
+    setShowSavedModal(true);
+  }, []);
 
 
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden">
+    <div className="h-screen flex flex-col overflow-hidden">
       <HeroSection
         onWorldCupClick={handleWorldCupClick}
         onGalleryClick={handleStartExploring}
-        onSavedMessagesClick={() => setShowSavedModal(true)}
+        onSavedMessagesClick={handleSavedMessagesClick}
         savedMessagesCount={savedMessagesCount}
       />
-
 
       {/* Main Content - Chat fills all remaining space */}
       <section className="flex-1 min-h-0">

@@ -262,60 +262,64 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50">
-      <div className="w-full h-full bg-white p-4 overflow-y-auto">
-        <div className="flex justify-between items-center mb-3 md:mb-4">
+      <div className="w-full h-full bg-white p-4">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-base md:text-lg font-bold">{getRoundName(currentRound)}</h2>
           <Button variant="ghost" size="sm" onClick={onClose}>
             닫기
           </Button>
         </div>
-        <div className="grid grid-cols-2 gap-2 md:gap-4">
-          <div 
-            onClick={() => {
-              console.log('🖱️ Card 1 clicked:', currentMatch.exhibition1.title);
-              selectWinner(currentMatch.exhibition1);
-            }}
-            className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md"
-          >
-            <div className="relative aspect-[3/4]">
-              <img
-                src={currentMatch.exhibition1.image}
-                alt={currentMatch.exhibition1.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
-                }}
-              />
-              <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-xs md:text-sm">
-                {currentMatch.exhibition1.title}
+        <div className="flex justify-center items-start h-[calc(100vh-120px)] overflow-hidden">
+          <div className="grid grid-cols-2 gap-2 md:gap-4 w-full h-full" style={{
+            maxHeight: 'calc(100vh - 120px)',
+          }}>
+            <div 
+              onClick={() => {
+                console.log('🖱️ Card 1 clicked:', currentMatch.exhibition1.title);
+                selectWinner(currentMatch.exhibition1);
+              }}
+              className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md aspect-[3/4] max-h-full"
+            >
+              <div className="relative w-full h-full">
+                <img
+                  src={currentMatch.exhibition1.image}
+                  alt={currentMatch.exhibition1.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                  }}
+                />
+                <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-xs md:text-sm">
+                  {currentMatch.exhibition1.title}
+                </div>
               </div>
             </div>
-          </div>
-          <div 
-            onClick={() => {
-              console.log('🖱️ Card 2 clicked:', currentMatch.exhibition2.title);
-              selectWinner(currentMatch.exhibition2);
-            }}
-            className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md"
-          >
-            <div className="relative aspect-[3/4]">
-              <img
-                src={currentMatch.exhibition2.image}
-                alt={currentMatch.exhibition2.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = "none";
-                }}
-              />
-              <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-xs md:text-sm">
-                {currentMatch.exhibition2.title}
+            <div 
+              onClick={() => {
+                console.log('🖱️ Card 2 clicked:', currentMatch.exhibition2.title);
+                selectWinner(currentMatch.exhibition2);
+              }}
+              className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md aspect-[3/4] max-h-full"
+            >
+              <div className="relative w-full h-full">
+                <img
+                  src={currentMatch.exhibition2.image}
+                  alt={currentMatch.exhibition2.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = "none";
+                  }}
+                />
+                <div className="absolute bottom-0 w-full bg-black/60 text-white p-2 text-xs md:text-sm">
+                  {currentMatch.exhibition2.title}
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="mt-3 md:mt-4 text-center text-xs md:text-sm text-muted-foreground">
+        <div className="mt-4 text-center text-xs md:text-sm text-muted-foreground">
           {currentMatchIndex + 1} / {allMatches.filter(m => m.round === currentRound).length}
         </div>
       </div>
