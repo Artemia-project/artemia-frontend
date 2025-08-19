@@ -269,17 +269,16 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
             닫기
           </Button>
         </div>
-        <div className="flex justify-center items-center h-[calc(100vh-120px)]">
-          <div className="grid grid-cols-2 gap-4 w-full max-w-none" style={{
+        <div className="flex justify-center items-start h-[calc(100vh-120px)] overflow-hidden">
+          <div className="grid grid-cols-2 gap-2 md:gap-4 w-full h-full" style={{
             maxHeight: 'calc(100vh - 120px)',
-            aspectRatio: '2/1', // Two 3:4 cards side by side = 6:4 = 3:2, but accounting for gap
           }}>
             <div 
               onClick={() => {
                 console.log('🖱️ Card 1 clicked:', currentMatch.exhibition1.title);
                 selectWinner(currentMatch.exhibition1);
               }}
-              className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md aspect-[3/4]"
+              className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md aspect-[3/4] max-h-full"
             >
               <div className="relative w-full h-full">
                 <img
@@ -301,7 +300,7 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
                 console.log('🖱️ Card 2 clicked:', currentMatch.exhibition2.title);
                 selectWinner(currentMatch.exhibition2);
               }}
-              className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md aspect-[3/4]"
+              className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md aspect-[3/4] max-h-full"
             >
               <div className="relative w-full h-full">
                 <img
