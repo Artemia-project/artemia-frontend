@@ -269,19 +269,19 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
             닫기
           </Button>
         </div>
-        <div className="grid grid-cols-2 gap-2 md:gap-4">
+        <div className="grid grid-cols-2 gap-2 md:gap-4 h-[calc(100vh-8rem)]">
           <div 
             onClick={() => {
               console.log('🖱️ Card 1 clicked:', currentMatch.exhibition1.title);
               selectWinner(currentMatch.exhibition1);
             }}
-            className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md"
+            className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md flex flex-col"
           >
-            <div className="relative aspect-[3/4]">
+            <div className="relative flex-1 flex items-center justify-center bg-gray-50">
               <img
                 src={currentMatch.exhibition1.image}
                 alt={currentMatch.exhibition1.title}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-full object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = "none";
@@ -297,13 +297,13 @@ export const ExhibitionWorldCup: React.FC<ExhibitionWorldCupProps> = ({
               console.log('🖱️ Card 2 clicked:', currentMatch.exhibition2.title);
               selectWinner(currentMatch.exhibition2);
             }}
-            className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md"
+            className="cursor-pointer hover:scale-[1.02] transition-all duration-200 border rounded-lg overflow-hidden bg-white shadow-md flex flex-col"
           >
-            <div className="relative aspect-[3/4]">
+            <div className="relative flex-1 flex items-center justify-center bg-gray-50">
               <img
                 src={currentMatch.exhibition2.image}
                 alt={currentMatch.exhibition2.title}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-full object-contain"
                 onError={(e) => {
                   const target = e.target as HTMLImageElement;
                   target.style.display = "none";
